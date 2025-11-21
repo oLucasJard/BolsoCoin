@@ -65,7 +65,11 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     .eq('owner_id', user.id)
     .order('created_at', { ascending: true });
 
-  if (ownedError) throw ownedError;
+  if (ownedError) {
+    console.error('Erro ao buscar workspaces:', ownedError);
+    // Se falhar, criar workspace padrão
+    return await createDefaultWorkspace(supabase, user.id);
+  }
 
   // Buscar workspaces onde o usuário é membro
   const { data: memberWorkspaces, error: memberError } = await supabase
@@ -90,7 +94,59 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     return [...(ownedWorkspaces || []), ...(sharedWorkspaces || [])];
   }
 
+  // Se não tem workspaces, criar um padrão
+  if (!ownedWorkspaces || ownedWorkspaces.length === 0) {
+    return await createDefaultWorkspace(supabase, user.id);
+  }
+
   return ownedWorkspaces || [];
+}
+
+// ============================================================================
+// CREATE DEFAULT WORKSPACE (Helper)
+// ============================================================================
+
+async function createDefaultWorkspace(supabase: any, userId: string): Promise<Workspace[]> {
+  try {
+    // Criar workspace padrão
+    const { data: newWorkspace, error: createError } = await supabase
+      .from('workspaces')
+      .insert({
+        owner_id: userId,
+        name: 'Pessoal',
+        description: 'Workspace padrão para suas finanças pessoais',
+        icon: '💰',
+        color: '#FFD100',
+        type: 'personal',
+        settings: {},
+      })
+      .select()
+      .single();
+
+    if (createError || !newWorkspace) {
+      console.error('Erro ao criar workspace padrão:', createError);
+      return [];
+    }
+
+    // Adicionar o usuário como owner
+    await supabase.from('workspace_members').insert({
+      workspace_id: newWorkspace.id,
+      user_id: userId,
+      role: 'owner',
+      permissions: {
+        can_view: true,
+        can_create: true,
+        can_edit: true,
+        can_delete: true,
+        can_manage_members: true,
+      },
+    });
+
+    return [newWorkspace];
+  } catch (error) {
+    console.error('Erro ao criar workspace padrão:', error);
+    return [];
+  }
 }
 
 // ============================================================================

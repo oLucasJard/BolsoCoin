@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { processTextInput, processImageInput, createTransaction } from '@/lib/actions/transaction.actions';
 import { toast } from 'sonner';
 import { MessageSquare, Mic, Image as ImageIcon, Loader2, Check, X, Sparkles } from 'lucide-react';
@@ -17,6 +18,7 @@ type ExtractedData = {
 };
 
 export default function MagicPage() {
+  const { activeWorkspace } = useWorkspace();
   const [activeTab, setActiveTab] = useState<'text' | 'audio' | 'image'>('text');
   const [textInput, setTextInput] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -62,12 +64,16 @@ export default function MagicPage() {
   };
 
   const handleConfirm = async () => {
-    if (!extractedData) return;
+    if (!extractedData || !activeWorkspace) {
+      toast.error('Nenhum workspace selecionado');
+      return;
+    }
 
     setProcessing(true);
     try {
       await createTransaction({
         ...extractedData,
+        workspaceId: activeWorkspace.id,
         source: 'web',
       });
       toast.success('Transação adicionada com sucesso!');

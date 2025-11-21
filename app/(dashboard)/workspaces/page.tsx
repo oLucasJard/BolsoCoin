@@ -23,19 +23,25 @@ export default function WorkspacesPage() {
 
   // Carregar stats de cada workspace
   useEffect(() => {
-    workspaces.forEach(async (workspace) => {
-      if (!stats[workspace.id] && !loadingStats[workspace.id]) {
-        setLoadingStats((prev) => ({ ...prev, [workspace.id]: true }));
-        try {
-          const workspaceStats = await getWorkspaceStats(workspace.id);
-          setStats((prev) => ({ ...prev, [workspace.id]: workspaceStats }));
-        } catch (error) {
-          console.error('Erro ao carregar stats:', error);
-        } finally {
-          setLoadingStats((prev) => ({ ...prev, [workspace.id]: false }));
+    const loadAllStats = async () => {
+      for (const workspace of workspaces) {
+        if (!stats[workspace.id] && !loadingStats[workspace.id]) {
+          setLoadingStats((prev) => ({ ...prev, [workspace.id]: true }));
+          try {
+            const workspaceStats = await getWorkspaceStats(workspace.id);
+            setStats((prev) => ({ ...prev, [workspace.id]: workspaceStats }));
+          } catch (error) {
+            console.error('Erro ao carregar stats:', error);
+          } finally {
+            setLoadingStats((prev) => ({ ...prev, [workspace.id]: false }));
+          }
         }
       }
-    });
+    };
+    
+    if (workspaces.length > 0) {
+      loadAllStats();
+    }
   }, [workspaces]);
 
   const handleDelete = async (workspaceId: string, workspaceName: string) => {

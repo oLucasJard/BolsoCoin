@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { getTransactions, deleteTransaction } from '@/lib/actions/transaction.actions';
 import TransactionList from '@/components/TransactionList';
 import { Database } from '@/lib/supabase/types';
@@ -10,19 +11,24 @@ import { Filter } from 'lucide-react';
 type Transaction = Database['public']['Tables']['transactions']['Row'];
 
 export default function TransacoesPage() {
+  const { activeWorkspace, isLoading: workspaceLoading } = useWorkspace();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
 
   useEffect(() => {
-    loadTransactions();
-  }, [filter]);
+    if (!workspaceLoading && activeWorkspace) {
+      loadTransactions();
+    }
+  }, [filter, activeWorkspace, workspaceLoading]);
 
   const loadTransactions = async () => {
+    if (!activeWorkspace) return;
+    
     setLoading(true);
     try {
       const filters = filter !== 'all' ? { type: filter as 'income' | 'expense' } : undefined;
-      const data = await getTransactions(filters);
+      const data = await getTransactions(activeWorkspace.id, filters);
       setTransactions(data);
     } catch (error) {
       toast.error('Erro ao carregar transações');

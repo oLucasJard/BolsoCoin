@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import {
   getBudgets,
   getGoals,
@@ -41,6 +42,7 @@ type BudgetComparison = {
 };
 
 export default function OrcamentosPage() {
+  const { activeWorkspace, isLoading: workspaceLoading } = useWorkspace();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [comparison, setComparison] = useState<BudgetComparison[]>([]);
@@ -53,16 +55,20 @@ export default function OrcamentosPage() {
   const currentYear = now.getFullYear();
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!workspaceLoading && activeWorkspace) {
+      loadData();
+    }
+  }, [activeWorkspace, workspaceLoading]);
 
   const loadData = async () => {
+    if (!activeWorkspace) return;
+    
     setLoading(true);
     try {
       const [budgetsData, goalsData, comparisonData] = await Promise.all([
-        getBudgets(currentMonth, currentYear),
-        getGoals(),
-        getBudgetComparison(currentMonth, currentYear),
+        getBudgets(activeWorkspace.id, currentMonth, currentYear),
+        getGoals(activeWorkspace.id),
+        getBudgetComparison(activeWorkspace.id, currentMonth, currentYear),
       ]);
       setBudgets(budgetsData);
       setGoals(goalsData);
@@ -76,6 +82,8 @@ export default function OrcamentosPage() {
 
   const handleCreateBudget = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!activeWorkspace) return;
+    
     const formData = new FormData(e.currentTarget);
 
     try {
@@ -84,6 +92,7 @@ export default function OrcamentosPage() {
         amount: parseFloat(formData.get('amount') as string),
         month: currentMonth,
         year: currentYear,
+        workspaceId: activeWorkspace.id,
       });
       toast.success('Orçamento criado!');
       setShowBudgetModal(false);
@@ -95,6 +104,8 @@ export default function OrcamentosPage() {
 
   const handleCreateGoal = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!activeWorkspace) return;
+    
     const formData = new FormData(e.currentTarget);
 
     try {
@@ -103,6 +114,7 @@ export default function OrcamentosPage() {
         description: formData.get('description') as string,
         targetAmount: parseFloat(formData.get('amount') as string),
         deadline: formData.get('deadline') ? new Date(formData.get('deadline') as string) : undefined,
+        workspaceId: activeWorkspace.id,
       });
       toast.success('Meta criada!');
       setShowGoalModal(false);

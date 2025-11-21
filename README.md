@@ -14,15 +14,13 @@ O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando
 
 ## 🚀 Stack Tecnológico
 
-Este projeto foi desenvolvido com tecnologias modernas e eficientes:
-
 ### Backend & Database
 - [Next.js 15](https://nextjs.org/) - Framework Full-Stack com App Router e Server Actions
-- [Neon](https://neon.tech/) - PostgreSQL Serverless com scaling automático
-- [Drizzle ORM](https://orm.drizzle.team/) - ORM TypeScript-first, leve e performático
+- [Supabase](https://supabase.com/) - Backend as a Service (Database + Auth)
+- PostgreSQL - Banco de dados relacional com Row Level Security
 
 ### Autenticação
-- [Clerk](https://clerk.com/) - Autenticação moderna com login social, 2FA e mais
+- [Supabase Auth](https://supabase.com/auth) - Autenticação completa com login social, 2FA e mais
 
 ### Inteligência Artificial
 - [OpenAI GPT-4o](https://openai.com/) - Interpretação de texto e imagem (Vision/OCR)
@@ -95,8 +93,7 @@ Antes de começar, você vai precisar:
 
 - [Node.js](https://nodejs.org/en/) (versão 18 ou superior)
 - [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
-- Conta no [Neon](https://neon.tech/) (PostgreSQL Serverless - Grátis)
-- Conta no [Clerk](https://clerk.com/) (Autenticação - Grátis)
+- Conta no [Supabase](https://supabase.com/) (Grátis)
 - Chave da [OpenAI API](https://platform.openai.com/) (Necessário créditos)
 - (Opcional) Bot do [Telegram](https://t.me/BotFather) para integração
 
@@ -105,7 +102,7 @@ Antes de começar, você vai precisar:
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/BolsoCoin.git
+git clone https://github.com/oLucasJard/BolsoCoin.git
 cd BolsoCoin
 ```
 
@@ -113,65 +110,32 @@ cd BolsoCoin
 
 ```bash
 npm install
-# ou
-yarn install
 ```
 
 ### 3. Configure as variáveis de ambiente
 
-Crie um arquivo `.env.local` na raiz do projeto baseado no `.env.example`:
+Crie um arquivo `.env.local` na raiz do projeto:
 
 ```env
-# Database (Neon)
-DATABASE_URL=postgresql://user:password@host/database
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-aqui
 
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
-
-# OpenAI API
+# OpenAI
 OPENAI_API_KEY=sk-...
 
-# Telegram Bot (Opcional)
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
+# Telegram (Opcional)
+TELEGRAM_BOT_TOKEN=seu_token
+TELEGRAM_WEBHOOK_SECRET=sua_secret
 ```
 
-#### Como obter as credenciais:
+### 4. Configure o banco de dados Supabase
 
-**Neon (Database):**
-1. Crie uma conta em [neon.tech](https://neon.tech)
-2. Crie um novo projeto
-3. Copie a `DATABASE_URL` das configurações
+1. Crie um projeto no Supabase
+2. Vá em "SQL Editor"
+3. Execute o conteúdo de `supabase/schema.sql`
 
-**Clerk (Auth):**
-1. Crie uma conta em [clerk.com](https://clerk.com)
-2. Crie uma nova aplicação
-3. Copie as chaves da aba "API Keys"
-
-**OpenAI:**
-1. Acesse [platform.openai.com](https://platform.openai.com)
-2. Vá em "API Keys"
-3. Crie uma nova chave
-
-**Telegram (Opcional):**
-1. Fale com [@BotFather](https://t.me/BotFather)
-2. Use `/newbot` e siga as instruções
-3. Copie o token fornecido
-
-### 4. Configure o banco de dados
-
-Execute o push do schema para o Neon:
-
-```bash
-npm run db:push
-```
-
-Isso irá criar automaticamente todas as tabelas necessárias no seu banco de dados Neon.
+Isso criará todas as tabelas, políticas de segurança (RLS) e triggers necessários.
 
 ## 🎮 Executando o projeto
 
@@ -179,8 +143,6 @@ Isso irá criar automaticamente todas as tabelas necessárias no seu banco de da
 
 ```bash
 npm run dev
-# ou
-yarn dev
 ```
 
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
@@ -190,9 +152,6 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 ```bash
 npm run build
 npm run start
-# ou
-yarn build
-yarn start
 ```
 
 ## 📁 Estrutura do Projeto
@@ -200,47 +159,43 @@ yarn start
 ```
 BolsoCoin/
 ├── app/
-│   ├── (auth)/                    # Grupo de rotas de autenticação
-│   │   ├── sign-in/               # Página de login (Clerk)
-│   │   └── sign-up/               # Página de cadastro (Clerk)
-│   ├── (dashboard)/               # Grupo de rotas protegidas
-│   │   ├── dashboard/             # Dashboard principal
-│   │   ├── transacoes/            # Gerenciamento de transações
-│   │   ├── magica/                # Página Mágica (IA)
-│   │   ├── relatorios/            # Relatórios e análises
-│   │   └── layout.tsx             # Layout do dashboard
-│   ├── api/
-│   │   └── telegram-webhook/      # Webhook do bot do Telegram
-│   ├── layout.tsx                 # Layout raiz (Clerk Provider)
-│   ├── page.tsx                   # Landing page
-│   └── globals.css                # Estilos globais
-├── components/                    # Componentes reutilizáveis
-│   ├── Navbar.tsx                 # Barra de navegação
-│   ├── StatCard.tsx               # Card de estatísticas
-│   └── TransactionList.tsx        # Lista de transações
+│   ├── (auth)/
+│   │   ├── login/              # Página de login
+│   │   └── signup/             # Página de cadastro
+│   ├── (dashboard)/
+│   │   ├── dashboard/          # Dashboard principal
+│   │   ├── transacoes/         # Lista de transações
+│   │   ├── magica/             # Página Mágica (IA)
+│   │   ├── relatorios/         # Relatórios
+│   │   └── layout.tsx
+│   ├── auth/callback/          # Callback OAuth
+│   ├── api/telegram-webhook/   # Webhook Telegram
+│   └── page.tsx                # Landing page
+├── components/
+│   ├── Navbar.tsx
+│   ├── UserButton.tsx
+│   ├── StatCard.tsx
+│   └── TransactionList.tsx
 ├── lib/
-│   ├── db/
-│   │   ├── schema.ts              # Schema Drizzle (tabelas)
-│   │   └── index.ts               # Cliente Drizzle
+│   ├── supabase/
+│   │   ├── client.ts           # Cliente browser
+│   │   ├── server.ts           # Cliente server
+│   │   ├── middleware.ts       # Middleware auth
+│   │   └── types.ts            # Types do DB
 │   ├── actions/
-│   │   ├── user.actions.ts        # Server Actions de usuário
-│   │   └── transaction.actions.ts # Server Actions de transações
-│   ├── openai.ts                  # Integração OpenAI (GPT-4o, Whisper)
-│   └── telegram-bot.ts            # Lógica do bot do Telegram
-├── drizzle/                       # Migrações do Drizzle (auto-gerado)
-├── middleware.ts                  # Middleware do Clerk
-├── drizzle.config.ts              # Configuração do Drizzle
-├── next.config.js                 # Configuração do Next.js
-├── package.json                   # Dependências
-├── tailwind.config.ts             # Configuração do Tailwind
-├── tsconfig.json                  # Configuração do TypeScript
-└── README.md                      # Este arquivo
+│   │   ├── user.actions.ts
+│   │   └── transaction.actions.ts
+│   ├── openai.ts               # Integração OpenAI
+│   └── telegram-bot.ts         # Bot Telegram
+├── supabase/
+│   └── schema.sql              # Schema do banco
+└── middleware.ts               # Middleware Next.js
 ```
 
 ## 🎯 Roadmap
 
 ### MVP (Atual)
-- [x] Autenticação com Clerk
+- [x] Autenticação com Supabase
 - [x] Dashboard com estatísticas
 - [x] Página Mágica - Input por texto
 - [x] Página Mágica - Input por imagem
@@ -260,36 +215,20 @@ BolsoCoin/
 
 ## 🔒 Segurança
 
-- Autenticação robusta com Clerk
-- Todas as requisições validadas com middleware
-- Dados isolados por usuário (Row Level Security conceitual)
+- Autenticação robusta com Supabase Auth
+- Row Level Security (RLS) em todas as tabelas
 - Variáveis de ambiente para credenciais
 - HTTPS obrigatório em produção
-
-## 🐛 Troubleshooting
-
-### Erro ao conectar no Neon
-- Verifique se a `DATABASE_URL` está correta
-- Certifique-se que o IP está liberado nas configurações do Neon
-
-### Erro na OpenAI API
-- Verifique se tem créditos na conta
-- Confirme se a chave API está ativa
-- Limite de requisições pode ter sido atingido
-
-### Bot do Telegram não responde
-- Verifique se o webhook está configurado corretamente
-- Teste o endpoint `/api/telegram-webhook` manualmente
-- Confirme o `TELEGRAM_BOT_TOKEN`
+- Validação de inputs
 
 ## 🤝 Contribuindo
 
-Contribuições são sempre bem-vindas! 
+Contribuições são sempre bem-vindas!
 
 1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+2. Crie uma branch (`git checkout -b feature/NovaFeature`)
+3. Commit suas mudanças (`git commit -m 'Add NovaFeature'`)
+4. Push para a branch (`git push origin feature/NovaFeature`)
 5. Abra um Pull Request
 
 ## 📝 Licença
@@ -298,7 +237,7 @@ Este projeto está sob a licença MIT.
 
 ## 📧 Contato
 
-BRANDUP HUB - [@BrandUpHub](https://github.com/oLucasJard)
+BRANDUP HUB - [@oLucasJard](https://github.com/oLucasJard)
 
 Link do Projeto: [https://github.com/oLucasJard/BolsoCoin](https://github.com/oLucasJard/BolsoCoin)
 
@@ -307,4 +246,3 @@ Link do Projeto: [https://github.com/oLucasJard/BolsoCoin](https://github.com/oL
 Desenvolvido com 💚 e ☕ por **BRANDUP HUB**
 
 **BolsoCoin** - Suas finanças, sem fricção. 🚀
-

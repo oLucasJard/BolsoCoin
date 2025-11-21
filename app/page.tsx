@@ -22,13 +22,13 @@ export default function Home() {
 
           <div className="flex space-x-4">
             <Link
-              href="/sign-up"
+              href="/signup"
               className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all transform hover:scale-105"
             >
               Começar Gratuitamente
             </Link>
             <Link
-              href="/sign-in"
+              href="/login"
               className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-4 px-8 rounded-lg shadow-lg transition-all border-2 border-green-600"
             >
               Entrar
@@ -121,7 +121,7 @@ export default function Home() {
             Junte-se ao BolsoCoin e tenha controle total com zero esforço
           </p>
           <Link
-            href="/sign-up"
+            href="/signup"
             className="bg-white text-green-600 hover:bg-gray-100 font-bold py-4 px-8 rounded-lg shadow-lg transition-all transform hover:scale-105 inline-block"
           >
             Começar Agora - É Grátis

@@ -5,8 +5,7 @@ Este guia irá te ajudar a configurar o BolsoCoin do zero em menos de 10 minutos
 ## 📋 Checklist
 
 - [ ] Node.js 18+ instalado
-- [ ] Conta no Neon criada
-- [ ] Conta no Clerk criada
+- [ ] Conta no Supabase criada
 - [ ] Chave OpenAI obtida
 - [ ] (Opcional) Bot do Telegram criado
 
@@ -20,20 +19,30 @@ cd BolsoCoin
 npm install
 ```
 
-### 2. Configure o Neon (Database)
+### 2. Configure o Supabase (Database + Auth)
 
-1. Acesse [console.neon.tech](https://console.neon.tech)
-2. Clique em "Create a project"
-3. Copie a **Connection String** (DATABASE_URL)
+1. Acesse [supabase.com](https://supabase.com)
+2. Clique em "New Project"
+3. Preencha os dados do projeto
+4. Aguarde o projeto ser criado
+5. Em "Project Settings → API", copie:
+   - `NEXT_PUBLIC_SUPABASE_URL` (Project URL)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (anon/public key)
 
-### 3. Configure o Clerk (Autenticação)
+### 3. Configure o Banco de Dados
 
-1. Acesse [dashboard.clerk.com](https://dashboard.clerk.com)
-2. Clique em "Add application"
-3. Escolha nome e métodos de login (Email, Google, GitHub, etc.)
-4. Em "API Keys", copie:
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - `CLERK_SECRET_KEY`
+No Supabase Dashboard:
+
+1. Vá em "SQL Editor"
+2. Clique em "New query"
+3. Cole todo o conteúdo do arquivo `supabase/schema.sql`
+4. Clique em "Run" para executar
+
+Isso irá criar:
+- Tabelas (profiles, transactions, categories)
+- Políticas de segurança (RLS)
+- Triggers automáticos
+- Índices de performance
 
 ### 4. Configure a OpenAI
 
@@ -47,16 +56,9 @@ npm install
 Crie o arquivo `.env.local` na raiz do projeto:
 
 ```env
-# Database
-DATABASE_URL=postgresql://seu_usuario:senha@host.neon.tech/neondb?sslmode=require
-
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-aqui
 
 # OpenAI
 OPENAI_API_KEY=sk-...
@@ -66,15 +68,7 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_WEBHOOK_SECRET=
 ```
 
-### 6. Configure o Banco de Dados
-
-```bash
-npm run db:push
-```
-
-Este comando irá criar todas as tabelas necessárias no Neon.
-
-### 7. Execute o Projeto
+### 6. Execute o Projeto
 
 ```bash
 npm run dev
@@ -88,6 +82,21 @@ Você já pode:
 1. Criar uma conta
 2. Acessar o Dashboard
 3. Usar a Página Mágica para adicionar transações com IA
+
+## 🔐 (Opcional) Configurar Login Social
+
+### Google OAuth
+
+No Supabase Dashboard:
+
+1. Vá em "Authentication → Providers"
+2. Ative o "Google"
+3. Crie credenciais no [Google Cloud Console](https://console.cloud.google.com):
+   - Crie um projeto
+   - Ative a "Google+ API"
+   - Crie credenciais OAuth 2.0
+   - Adicione a Redirect URI do Supabase
+4. Cole Client ID e Secret no Supabase
 
 ## 🤖 (Opcional) Configurar Bot do Telegram
 
@@ -135,22 +144,21 @@ Configure as mesmas variáveis de ambiente no painel da Vercel.
 - Verifique se a chave está correta
 - Confirme que tem créditos na conta
 
-### "Database connection failed" (Neon)
-- Verifique a DATABASE_URL
-- Confirme que o IP está liberado
+### "Database connection failed" (Supabase)
+- Verifique a NEXT_PUBLIC_SUPABASE_URL
+- Confirme que as tabelas foram criadas (execute schema.sql)
 
-### "Unauthorized" (Clerk)
+### "Unauthorized" (Supabase)
 - Verifique as chaves
-- Confirme que a aplicação está ativa
+- Confirme que o RLS está ativo nas tabelas
 
 ## 📚 Próximos Passos
 
 - Explore a **Página Mágica** e adicione transações por texto
 - Teste o upload de foto de recibo
 - Configure o Bot do Telegram
-- Customize as categorias
+- Configure login social (Google)
 
 ---
 
 **Precisa de ajuda?** Abra uma issue no GitHub!
-

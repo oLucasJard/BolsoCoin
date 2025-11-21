@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { UserButton } from '@clerk/nextjs';
+import UserButton from './UserButton';
 import { usePathname } from 'next/navigation';
 import { Home, ArrowLeftRight, Sparkles, BarChart3 } from 'lucide-react';
 
@@ -49,7 +49,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
         </div>
       </div>
     </nav>

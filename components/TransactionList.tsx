@@ -1,9 +1,11 @@
 'use client';
 
-import { Transaction } from '@/lib/db/schema';
+import { Database } from '@/lib/supabase/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Trash2, Edit } from 'lucide-react';
+
+type Transaction = Database['public']['Tables']['transactions']['Row'];
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -49,7 +51,7 @@ export default function TransactionList({ transactions, onDelete, onEdit }: Tran
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                    {transaction.categoryName}
+                    {transaction.category_name}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">

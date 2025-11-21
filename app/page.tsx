@@ -206,7 +206,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 border-t border-c6-gray-800">
         <div className="container mx-auto px-4 sm:px-6 text-center text-c6-gray-500 text-sm">
-          <p>© 2024 BolsoCoin. Desenvolvido com 💚 por BRANDUP HUB</p>
+          <p>© 2025 BolsoCoin. Desenvolvido com 💚 por BRANDUP HUB</p>
         </div>
       </footer>
     </main>

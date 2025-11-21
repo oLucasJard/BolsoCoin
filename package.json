@@ -6,13 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "next": "^15.0.3",
-    "@supabase/supabase-js": "^2.45.4"
+    "@clerk/nextjs": "^5.7.1",
+    "@neondatabase/serverless": "^0.9.5",
+    "drizzle-orm": "^0.33.0",
+    "openai": "^4.67.3",
+    "zod": "^3.23.8",
+    "date-fns": "^4.1.0",
+    "recharts": "^2.13.3",
+    "lucide-react": "^0.454.0",
+    "sonner": "^1.7.1",
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -23,7 +34,8 @@
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "eslint": "^8",
-    "eslint-config-next": "15.0.3"
+    "eslint-config-next": "15.0.3",
+    "drizzle-kit": "^0.24.2"
   }
 }
 

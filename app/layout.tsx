@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ptBR } from "@clerk/localizations";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BolsoCoin - Gerenciamento Financeiro Simplificado",
-  description: "Plataforma de gerenciamento financeiro pessoal de forma simples e eficiente",
+  title: "BolsoCoin - Central de Gerenciamento de Carteira",
+  description: "Gerenciamento financeiro pessoal com IA para entrada de dados por texto, áudio e imagem",
 };
 
 export default function RootLayout({
@@ -15,9 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>{children}</body>
-    </html>
+    <ClerkProvider localization={ptBR}>
+      <html lang="pt-BR">
+        <body className={inter.className}>
+          {children}
+          <Toaster position="top-right" richColors />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
 

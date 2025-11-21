@@ -256,7 +256,7 @@ export async function getDashboardStats() {
     }, {} as Record<string, number>);
 
   const topCategories = Object.entries(categoryStats)
-    .map(([name, value]) => ({ name, value }))
+    .map(([name, value]) => ({ name, value: value as number }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
 

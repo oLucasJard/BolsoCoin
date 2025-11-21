@@ -3,87 +3,122 @@ import StatCard from '@/components/StatCard';
 import TransactionList from '@/components/TransactionList';
 import BalanceChart from '@/components/BalanceChart';
 import CategoryPieChart from '@/components/CategoryPieChart';
-import { Wallet, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
   const stats = await getDashboardStats();
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Dashboard
-        </h1>
-        <Link
-          href="/magica"
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center space-x-2"
-        >
-          <span>✨</span>
-          <span>Adicionar Rápido</span>
-        </Link>
-      </div>
+    <div className="min-h-screen bg-c6-black text-white">
+      {/* Quick Action Button - Mobile Floating */}
+      <Link
+        href="/magica"
+        className="sm:hidden fixed bottom-24 right-4 z-40 w-14 h-14 bg-c6-yellow rounded-full flex items-center justify-center shadow-c6-yellow active:scale-95 transition-transform touch-manipulation"
+      >
+        <Sparkles className="text-c6-black" size={24} />
+      </Link>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          title="Saldo Atual"
-          value={`R$ ${stats.balance.toFixed(2)}`}
-          icon={Wallet}
-          color={stats.balance >= 0 ? 'green' : 'red'}
-        />
-        <StatCard
-          title="Receitas do Mês"
-          value={`R$ ${stats.totalIncome.toFixed(2)}`}
-          icon={TrendingUp}
-          color="green"
-        />
-        <StatCard
-          title="Despesas do Mês"
-          value={`R$ ${stats.totalExpense.toFixed(2)}`}
-          icon={TrendingDown}
-          color="red"
-        />
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Balance Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            Balanço Mensal
-          </h2>
-          <BalanceChart totalIncome={stats.totalIncome} totalExpense={stats.totalExpense} />
-        </div>
-
-        {/* Category Pie Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-2 mb-4">
-            <PieChart className="text-purple-600" size={24} />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Despesas por Categoria
-            </h2>
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold">
+              Olá! 👋
+            </h1>
+            <p className="text-c6-gray-400 text-sm sm:text-base">
+              Aqui está o resumo das suas finanças
+            </p>
           </div>
-          <CategoryPieChart categories={stats.topCategories} />
-        </div>
-      </div>
-
-      {/* Recent Transactions */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Últimas Transações
-          </h2>
+          
+          {/* Desktop Quick Action Button */}
           <Link
-            href="/transacoes"
-            className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium"
+            href="/magica"
+            className="hidden sm:flex btn-c6 items-center space-x-2"
           >
-            Ver todas →
+            <Sparkles size={20} />
+            <span>Adicionar Rápido</span>
           </Link>
         </div>
-        <TransactionList transactions={stats.recentTransactions} />
+
+        {/* Balance Card - Destaque */}
+        <div className="card-c6 bg-gradient-to-br from-c6-yellow to-c6-yellow-dark p-6 sm:p-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-c6-black/70 text-sm font-medium mb-2">Saldo Atual</p>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-c6-black">
+                R$ {stats.balance.toFixed(2)}
+              </h2>
+            </div>
+            <div className="w-12 h-12 bg-c6-black/10 rounded-full flex items-center justify-center">
+              <Wallet className="text-c6-black" size={24} />
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="card-c6 bg-c6-gray-900">
+            <div className="flex items-start justify-between mb-2">
+              <div className="w-10 h-10 bg-green-500/20 rounded-c6-sm flex items-center justify-center">
+                <TrendingUp className="text-green-500" size={20} />
+              </div>
+            </div>
+            <p className="text-c6-gray-400 text-sm mb-1">Receitas do Mês</p>
+            <p className="font-display text-2xl font-bold text-green-500">
+              R$ {stats.totalIncome.toFixed(2)}
+            </p>
+          </div>
+
+          <div className="card-c6 bg-c6-gray-900">
+            <div className="flex items-start justify-between mb-2">
+              <div className="w-10 h-10 bg-red-500/20 rounded-c6-sm flex items-center justify-center">
+                <TrendingDown className="text-red-500" size={20} />
+              </div>
+            </div>
+            <p className="text-c6-gray-400 text-sm mb-1">Despesas do Mês</p>
+            <p className="font-display text-2xl font-bold text-red-500">
+              R$ {stats.totalExpense.toFixed(2)}
+            </p>
+          </div>
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Balance Chart */}
+          <div className="card-c6 bg-c6-gray-900">
+            <h3 className="font-display text-lg font-semibold mb-4">
+              Balanço Mensal
+            </h3>
+            <BalanceChart totalIncome={stats.totalIncome} totalExpense={stats.totalExpense} />
+          </div>
+
+          {/* Category Pie Chart */}
+          <div className="card-c6 bg-c6-gray-900">
+            <h3 className="font-display text-lg font-semibold mb-4">
+              Despesas por Categoria
+            </h3>
+            <CategoryPieChart categories={stats.topCategories} />
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="card-c6 bg-c6-gray-900">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-lg sm:text-xl font-semibold">
+              Últimas Transações
+            </h3>
+            <Link
+              href="/transacoes"
+              className="text-c6-yellow hover:text-c6-yellow-light font-medium text-sm flex items-center space-x-1 touch-manipulation"
+            >
+              <span>Ver todas</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+          <TransactionList transactions={stats.recentTransactions} />
+        </div>
       </div>
     </div>
   );
 }
-

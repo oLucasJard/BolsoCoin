@@ -3,26 +3,117 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-sora: 'Sora', system-ui, sans-serif;
+  --background: #000000;
+  --foreground: #ffffff;
+  --c6-yellow: #FFD100;
+  --c6-yellow-light: #FFE066;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior-y: none;
+  touch-action: pan-x pan-y;
+}
+
+/* Mobile optimizations */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* C6 Bank Button Styles */
+@layer components {
+  .btn-c6 {
+    @apply bg-c6-yellow text-c6-black font-bold py-4 px-6 rounded-c6 shadow-c6-yellow transition-all duration-200 active:scale-95 touch-manipulation;
+  }
+  
+  .btn-c6:hover {
+    @apply bg-c6-yellow-light shadow-c6-lg;
+  }
+  
+  .btn-c6-outline {
+    @apply border-2 border-c6-yellow text-c6-yellow font-bold py-4 px-6 rounded-c6 transition-all duration-200 active:scale-95 touch-manipulation;
+  }
+  
+  .btn-c6-outline:hover {
+    @apply bg-c6-yellow text-c6-black;
+  }
+  
+  .card-c6 {
+    @apply bg-c6-gray-900 rounded-c6 p-6 shadow-c6 border border-c6-gray-800;
+  }
+  
+  .input-c6 {
+    @apply w-full bg-c6-gray-900 border border-c6-gray-700 text-white rounded-c6-sm px-4 py-3 focus:border-c6-yellow focus:ring-2 focus:ring-c6-yellow/20 transition-all outline-none;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Safe area utilities */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Scrollbar customization for mobile */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFD100;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FFE066;
+}
+
+/* Loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(to right, #1A1A1A 4%, #2D2D2D 25%, #1A1A1A 36%);
+  background-size: 1000px 100%;
 }
 

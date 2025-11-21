@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import { getTransactions, deleteTransaction } from '@/lib/actions/transaction.actions';
 import TransactionList from '@/components/TransactionList';
-import { Transaction } from '@/lib/db/schema';
+import { Database } from '@/lib/supabase/types';
 import { toast } from 'sonner';
 import { Filter } from 'lucide-react';
+
+type Transaction = Database['public']['Tables']['transactions']['Row'];
 
 export default function TransacoesPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);

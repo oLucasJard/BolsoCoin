@@ -1,15 +1,32 @@
 import { Telegraf } from 'telegraf';
-import { db } from './db';
-import { users, transactions } from './db/schema';
-import { eq } from 'drizzle-orm';
+import { createClient } from '@supabase/supabase-js';
 import { extractTransactionFromText } from './openai';
 
-export const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
+// Função para criar o cliente Supabase com service role
+function getSupabaseAdmin() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Supabase credentials not configured');
+  }
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
 
-// Mapear chatId -> userId (Clerk)
+export function createBot() {
+  if (!process.env.TELEGRAM_BOT_TOKEN) {
+    throw new Error('Telegram bot token not configured');
+  }
+  return new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+}
+
+// Mapear chatId -> userId (Supabase Auth)
 const chatIdToUserId = new Map<number, string>();
 
 export function setupTelegramBot() {
+  const bot = createBot();
+  const supabase = getSupabaseAdmin();
+  
   // Comando /start
   bot.command('start', async (ctx) => {
     await ctx.reply(
@@ -46,17 +63,20 @@ export function setupTelegramBot() {
     }
 
     try {
-      const userTransactions = await db.query.transactions.findMany({
-        where: eq(transactions.userId, userId),
-      });
+      const { data: transactions, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId);
 
-      const income = userTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      if (error) throw error;
 
-      const expense = userTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const income = transactions
+        ?.filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
+
+      const expense = transactions
+        ?.filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
 
       const balance = income - expense;
 
@@ -68,6 +88,7 @@ export function setupTelegramBot() {
         `Saldo: R$ ${balance.toFixed(2)}`
       );
     } catch (error) {
+      console.error(error);
       await ctx.reply('Erro ao buscar saldo. Tente novamente mais tarde.');
     }
   });
@@ -84,19 +105,24 @@ export function setupTelegramBot() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const todayTransactions = await db.query.transactions.findMany({
-        where: eq(transactions.userId, userId),
-      });
+      const { data: transactions, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('type', 'expense')
+        .gte('date', today.toISOString());
 
-      const todayExpenses = todayTransactions
-        .filter(t => t.type === 'expense' && new Date(t.date) >= today)
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      if (error) throw error;
+
+      const todayExpenses = transactions
+        ?.reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
 
       await ctx.reply(
         `📊 Gastos de Hoje:\n\n` +
         `Total: R$ ${todayExpenses.toFixed(2)}`
       );
     } catch (error) {
+      console.error(error);
       await ctx.reply('Erro ao buscar gastos. Tente novamente mais tarde.');
     }
   });
@@ -141,6 +167,7 @@ export function setupTelegramBot() {
         },
       });
     } catch (error) {
+      console.error(error);
       await ctx.reply('Erro ao processar transação. Verifique o formato e tente novamente.');
     }
   });
@@ -153,6 +180,8 @@ export function setupTelegramBot() {
       return;
     }
 
+    if (!('data' in ctx.callbackQuery)) return;
+    
     const data = ctx.callbackQuery.data;
 
     if (data === 'cancel') {
@@ -165,21 +194,53 @@ export function setupTelegramBot() {
       try {
         const extracted = JSON.parse(data.replace('confirm:', ''));
 
-        await db.insert(transactions).values({
-          userId,
-          amount: extracted.amount.toString(),
-          description: extracted.description,
-          type: extracted.type,
-          categoryName: extracted.category,
-          vendor: extracted.vendor,
-          date: extracted.date ? new Date(extracted.date) : new Date(),
-          rawInput: extracted.rawInput,
-          source: 'telegram',
-        });
+        // Buscar ou criar categoria
+        const { data: existingCategory } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('name', extracted.category)
+          .eq('user_id', userId)
+          .single();
+
+        let categoryId = existingCategory?.id;
+
+        if (!categoryId) {
+          const { data: newCategory, error: categoryError } = await supabase
+            .from('categories')
+            .insert({
+              name: extracted.category,
+              type: extracted.type,
+              user_id: userId,
+            })
+            .select('id')
+            .single();
+
+          if (categoryError) throw categoryError;
+          categoryId = newCategory.id;
+        }
+
+        // Inserir transação
+        const { error } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: userId,
+            amount: extracted.amount.toString(),
+            description: extracted.description,
+            type: extracted.type,
+            category_id: categoryId,
+            category_name: extracted.category,
+            vendor: extracted.vendor,
+            date: extracted.date ? new Date(extracted.date).toISOString() : new Date().toISOString(),
+            raw_input: extracted.rawInput,
+            source: 'telegram',
+          });
+
+        if (error) throw error;
 
         await ctx.answerCbQuery('Transação adicionada!');
         await ctx.editMessageText('✅ Transação adicionada com sucesso!');
       } catch (error) {
+        console.error(error);
         await ctx.answerCbQuery('Erro ao salvar');
         await ctx.editMessageText('❌ Erro ao salvar transação.');
       }
@@ -196,10 +257,20 @@ export function setupTelegramBot() {
 
 // Função para vincular um chat do Telegram a um usuário
 export async function linkTelegramChat(userId: string, chatId: string) {
-  await db.update(users)
-    .set({ telegramChatId: chatId, updatedAt: new Date() })
-    .where(eq(users.id, userId));
+  const supabase = getSupabaseAdmin();
+  
+  const { error } = await supabase
+    .from('profiles')
+    .update({ 
+      telegram_chat_id: chatId,
+      updated_at: new Date().toISOString() 
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error linking Telegram chat:', error);
+    throw error;
+  }
 
   chatIdToUserId.set(parseInt(chatId), userId);
 }
-

@@ -2,7 +2,7 @@ import Navbar from '@/components/Navbar';
 import WorkspaceSwitcher from '@/components/WorkspaceSwitcher';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import AutoMigration from '@/components/AutoMigration';
-import { getWorkspaces } from '@/lib/actions/workspace.actions';
+import { getWorkspaces, type Workspace } from '@/lib/actions/workspace.actions';
 import WorkspaceLoader from '@/components/WorkspaceLoader';
 
 export default async function DashboardLayout({
@@ -10,7 +10,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let workspaces = [];
+  let workspaces: Workspace[] = [];
   
   try {
     workspaces = await getWorkspaces();

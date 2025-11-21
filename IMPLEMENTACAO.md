@@ -20,12 +20,14 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 ### 2. Módulos Implementados
 
 #### ✅ Módulo 1: Autenticação e Perfil
+
 - Login/Cadastro com Clerk (social auth disponível)
 - Sincronização automática de usuário
 - Middleware de proteção de rotas
 - Layout personalizado para auth
 
 #### ✅ Módulo 2: Dashboard
+
 - **Saldo Atual** (Receitas - Despesas)
 - **Receitas do Mês** com card dedicado
 - **Despesas do Mês** com card dedicado
@@ -34,6 +36,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 - Design responsivo e moderno
 
 #### ✅ Módulo 3: Gerenciamento de Transações
+
 - Listagem completa de todas as transações
 - Filtros por tipo (Receitas, Despesas, Todas)
 - Tabela com paginação virtual
@@ -43,6 +46,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 #### ✅ Módulo 4: Página Mágica (Feature Principal)
 
 **Input por Texto:**
+
 - Campo de texto com linguagem natural
 - Processamento via GPT-4o
 - Extração automática de:
@@ -56,6 +60,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 - Exemplos de uso na interface
 
 **Input por Imagem:**
+
 - Upload de foto de recibo
 - Processamento via GPT-4o Vision
 - Extração de OCR dos dados
@@ -63,6 +68,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 - Confirmação visual
 
 **Input por Áudio:**
+
 - Estrutura pronta (UI criada)
 - Integração com Whisper preparada
 - Em desenvolvimento
@@ -70,12 +76,14 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 #### ✅ Módulo 5: Bot do Telegram
 
 **Comandos Implementados:**
+
 - `/start` - Boas-vindas e instruções
 - `/help` - Ajuda e exemplos
 - `/saldo` - Ver saldo atual
 - `/gastos_hoje` - Total gasto no dia
 
 **Funcionalidades:**
+
 - Processamento de mensagens de texto
 - Extração via IA igual à web
 - Confirmação com botões inline
@@ -126,6 +134,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 ## 🗄️ Schema do Banco de Dados
 
 ### Tabela: `users`
+
 - `id` (TEXT) - Clerk User ID
 - `email` (TEXT)
 - `name` (TEXT)
@@ -134,6 +143,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 - `created_at`, `updated_at`
 
 ### Tabela: `transactions`
+
 - `id` (UUID)
 - `user_id` (TEXT) - FK para users
 - `amount` (NUMERIC)
@@ -148,6 +158,7 @@ O BolsoCoin foi implementado com sucesso seguindo o escopo fornecido!
 - `created_at`, `updated_at`
 
 ### Tabela: `categories`
+
 - `id` (UUID)
 - `user_id` (TEXT)
 - `name` (TEXT)
@@ -202,23 +213,27 @@ TELEGRAM_WEBHOOK_SECRET=...
 ## 🚀 Como Usar
 
 ### 1. Setup Inicial
+
 ```bash
 npm install
 npm run db:push
 ```
 
 ### 2. Desenvolvimento
+
 ```bash
 npm run dev
 ```
 
 ### 3. Build para Produção
+
 ```bash
 npm run build
 npm start
 ```
 
 ### 4. Database Studio
+
 ```bash
 npm run db:studio
 ```
@@ -238,6 +253,7 @@ npm run db:studio
 ## 🤖 Integrações de IA
 
 ### GPT-4o para Texto
+
 ```typescript
 extractTransactionFromText("Café 15 reais Starbucks")
 // Retorna:
@@ -251,20 +267,23 @@ extractTransactionFromText("Café 15 reais Starbucks")
 ```
 
 ### GPT-4o Vision para Imagem
+
 ```typescript
-extractTransactionFromImage(base64Image)
+extractTransactionFromImage(base64Image);
 // Analisa recibo e extrai dados estruturados
 ```
 
 ### Whisper para Áudio (Preparado)
+
 ```typescript
-transcribeAudio(audioFile)
+transcribeAudio(audioFile);
 // Transcreve áudio em português
 ```
 
 ## 📱 Bot do Telegram
 
 **Fluxo de Uso:**
+
 1. Usuário envia: "Gasolina 200 posto Shell"
 2. Bot processa com GPT-4o
 3. Bot responde com confirmação + botões
@@ -323,7 +342,7 @@ transcribeAudio(audioFile)
 
 ## 🎉 Resultado Final
 
-O BolsoCoin está **100% funcional** e pronto para uso! 
+O BolsoCoin está **100% funcional** e pronto para uso!
 
 - Interface linda e moderna ✅
 - IA funcionando perfeitamente ✅
@@ -339,4 +358,3 @@ O BolsoCoin está **100% funcional** e pronto para uso!
 **Última Atualização**: 21/11/2024
 
 **Desenvolvido por**: BRANDUP HUB 💚
-

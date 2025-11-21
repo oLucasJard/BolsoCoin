@@ -155,6 +155,17 @@ export default function LoginPage() {
               Cadastre-se
             </Link>
           </div>
+
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 text-center">
+              <Link
+                href="/dev-login"
+                className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
+              >
+                ⚡ Dev Login (Teste Rápido)
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

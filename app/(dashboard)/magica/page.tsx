@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { processTextInput, processImageInput, createTransaction } from '@/lib/actions/transaction.actions';
 import { toast } from 'sonner';
 import { MessageSquare, Mic, Image as ImageIcon, Loader2, Check, X } from 'lucide-react';
+import AudioRecorder from '@/components/AudioRecorder';
 
 type ExtractedData = {
   amount: number;
@@ -166,15 +167,27 @@ export default function MagicPage() {
         )}
 
         {activeTab === 'audio' && (
-          <div className="text-center space-y-6">
-            <div className="py-12">
-              <Mic size={64} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Funcionalidade de áudio em desenvolvimento
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">
-                Em breve você poderá gravar áudio para adicionar transações
-              </p>
+          <div className="space-y-6">
+            <div className="py-8">
+              <AudioRecorder
+                onTranscriptionComplete={(text) => {
+                  setTextInput(text);
+                  setActiveTab('text');
+                  toast.success('Transcrição completa! Confirme os dados.');
+                  // Auto-processar o texto
+                  handleTextSubmit(new Event('submit') as any);
+                }}
+              />
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300">
+              <p className="font-semibold mb-2">💡 Como usar:</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>Clique no botão do microfone</li>
+                <li>Permita o acesso ao microfone</li>
+                <li>Fale sua transação naturalmente</li>
+                <li>Clique novamente para parar</li>
+                <li>Aguarde a transcrição e confirmação</li>
+              </ol>
             </div>
           </div>
         )}

@@ -355,6 +355,6 @@ O BolsoCoin está **100% funcional** e pronto para uso!
 
 **Status do Projeto**: ✅ COMPLETO E FUNCIONAL
 
-**Última Atualização**: 21/11/2024
+**Última Atualização**: 21/11/2025
 
 **Desenvolvido por**: BRANDUP HUB 💚

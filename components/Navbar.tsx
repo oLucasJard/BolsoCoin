@@ -12,7 +12,7 @@ export default function Navbar() {
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/transacoes', label: 'Transações', icon: ArrowLeftRight },
     { href: '/magica', label: 'Página Mágica', icon: Sparkles },
-    { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+    { href: '/orcamentos', label: 'Orçamentos & Metas', icon: BarChart3 },
   ];
 
   return (

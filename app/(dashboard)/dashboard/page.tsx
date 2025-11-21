@@ -1,6 +1,8 @@
 import { getDashboardStats } from '@/lib/actions/transaction.actions';
 import StatCard from '@/components/StatCard';
 import TransactionList from '@/components/TransactionList';
+import BalanceChart from '@/components/BalanceChart';
+import CategoryPieChart from '@/components/CategoryPieChart';
 import { Wallet, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
 import Link from 'next/link';
 
@@ -46,51 +48,23 @@ export default async function DashboardPage() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Categories */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-2 mb-4">
-            <PieChart className="text-purple-600" size={24} />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Top 5 Categorias
-            </h2>
-          </div>
-          <div className="space-y-3">
-            {stats.topCategories.map((category, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">{category.name}</span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  R$ {category.value.toFixed(2)}
-                </span>
-              </div>
-            ))}
-            {stats.topCategories.length === 0 && (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                Nenhuma despesa registrada este mês
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Balance Chart Placeholder */}
+        {/* Balance Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Balanço Mensal
           </h2>
-          <div className="h-48 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-gray-500 dark:text-gray-400">Gráfico em desenvolvimento</p>
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-green-600">Receitas:</span>
-                  <span className="font-medium">R$ {stats.totalIncome.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-red-600">Despesas:</span>
-                  <span className="font-medium">R$ {stats.totalExpense.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
+          <BalanceChart totalIncome={stats.totalIncome} totalExpense={stats.totalExpense} />
+        </div>
+
+        {/* Category Pie Chart */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-2 mb-4">
+            <PieChart className="text-purple-600" size={24} />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Despesas por Categoria
+            </h2>
           </div>
+          <CategoryPieChart categories={stats.topCategories} />
         </div>
       </div>
 

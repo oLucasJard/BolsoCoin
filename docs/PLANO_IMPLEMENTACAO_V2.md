@@ -12,7 +12,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ### 🎯 Fase 1: Multi-Workspace + PWA (Fundação)
 
 #### 1. 🏢 Multi-Workspace System
+
 **O que implementar:**
+
 - [ ] Schema de banco de dados (workspaces, workspace_members)
 - [ ] Migração: Adicionar `workspace_id` em tabelas existentes
 - [ ] API: CRUD de workspaces (criar, editar, deletar, listar)
@@ -23,6 +25,7 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 - [ ] Filtros globais por workspace ativo
 
 **Tecnologias:**
+
 - Supabase (PostgreSQL + RLS)
 - Next.js Server Actions
 - React Context para workspace ativo
@@ -32,7 +35,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ---
 
 #### 2. 📱 PWA (Progressive Web App)
+
 **O que implementar:**
+
 - [ ] Web App Manifest (manifest.json)
 - [ ] Service Worker (cache offline)
 - [ ] Ícones PWA (múltiplos tamanhos)
@@ -42,6 +47,7 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 - [ ] Sync em background (quando voltar online)
 
 **Tecnologias:**
+
 - Workbox (Google)
 - Next.js PWA plugin
 - IndexedDB para cache local
@@ -53,7 +59,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ### 🚀 Fase 2: Recursos PRO
 
 #### 3. 🤝 Compartilhamento de Workspaces
+
 **O que implementar:**
+
 - [ ] Sistema de convites (email)
 - [ ] Permissões (owner, admin, member, viewer)
 - [ ] UI de gerenciamento de membros
@@ -65,7 +73,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ---
 
 #### 4. 📊 Relatórios Avançados
+
 **O que implementar:**
+
 - [ ] Geração de PDF (relatório mensal)
 - [ ] Exportação Excel
 - [ ] DRE simplificado (Receitas - Despesas)
@@ -73,6 +83,7 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 - [ ] Prestação de contas (igreja/ONG)
 
 **Tecnologias:**
+
 - jsPDF / react-pdf
 - xlsx / exceljs
 
@@ -81,7 +92,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ---
 
 #### 5. 🔔 Notificações Push
+
 **O que implementar:**
+
 - [ ] Firebase Cloud Messaging
 - [ ] Permissões de notificação
 - [ ] Lembretes de contas
@@ -93,7 +106,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ---
 
 #### 6. 📈 Dashboard Consolidado
+
 **O que implementar:**
+
 - [ ] Visão geral de TODOS os workspaces
 - [ ] Comparação entre workspaces
 - [ ] Métricas agregadas
@@ -106,7 +121,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ### 🌟 Fase 3: IA Avançada (Opcional para v2.0)
 
 #### 7. 🤖 Assistente Financeiro (Chatbot)
+
 **O que implementar:**
+
 - [ ] Integração LangChain
 - [ ] Interface de chat
 - [ ] Comandos de consulta
@@ -117,7 +134,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ---
 
 #### 8. 🔮 Análise Preditiva
+
 **O que implementar:**
+
 - [ ] Modelo de previsão de gastos
 - [ ] Alertas proativos
 - [ ] Sugestões de economia
@@ -129,7 +148,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ### 🏦 Fase 4: Open Banking (Futuro)
 
 #### 9. 🏦 Integração Bancária
+
 **O que implementar:**
+
 - [ ] Pluggy/Belvo SDK
 - [ ] Fluxo de autenticação OAuth
 - [ ] Importação automática de transações
@@ -142,7 +163,9 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
 ### 🎮 Fase 5: Gamificação (Futuro)
 
 #### 10. 🏆 Sistema de Conquistas
+
 **O que implementar:**
+
 - [ ] Database de achievements
 - [ ] Lógica de desbloqueio
 - [ ] UI de conquistas
@@ -163,13 +186,13 @@ Baseado no `PLANEJAMENTO_V2.md`, identifiquei as seguintes funcionalidades princ
    - CRUD de workspaces
    - UI básica (criar, editar, deletar, trocar)
    - Migração de dados existentes
-   
 2. ✅ **PWA Básico** (DIFERENCIAL)
    - Manifest + Service Worker
    - Ícones e instalação
    - Funcionalidade offline básica
 
 **O que NÃO fazer agora:**
+
 - ❌ Compartilhamento (pode ser v2.1)
 - ❌ Relatórios avançados PDF/Excel (pode ser v2.1)
 - ❌ Notificações Push (pode ser v2.2)
@@ -185,6 +208,7 @@ Criei um **único arquivo SQL** com todas as alterações necessárias para o Mu
 ### Arquivo: `supabase/migrations/003_add_multi_workspace.sql`
 
 **O que inclui:**
+
 1. Tabela `workspaces`
 2. Tabela `workspace_members`
 3. Adicionar `workspace_id` em:
@@ -204,23 +228,27 @@ Criei um **único arquivo SQL** com todas as alterações necessárias para o Mu
 ### 1️⃣ Quais funcionalidades implementar primeiro?
 
 **Opção A (Recomendada - MVP Rápido):**
+
 - ✅ Multi-Workspace (completo)
 - ✅ PWA (básico - manifest + offline)
 - ⏱️ Tempo: 4 semanas
 
 **Opção B (MVP + Extras):**
+
 - ✅ Multi-Workspace (completo)
 - ✅ PWA (completo com notificações)
 - ✅ Dashboard Consolidado
 - ⏱️ Tempo: 6 semanas
 
 **Opção C (Full v2.0):**
+
 - ✅ Tudo da Fase 1 + Fase 2
 - ⏱️ Tempo: 10-12 semanas
 
 ### 2️⃣ Sobre o Multi-Workspace:
 
 **Perguntas:**
+
 - Limite de workspaces no plano FREE? (Sugestão: 1 workspace)
 - Limite no plano PRO? (Sugestão: 5 workspaces)
 - Workspace padrão criado automaticamente? (Sugestão: "Pessoal")
@@ -229,6 +257,7 @@ Criei um **único arquivo SQL** com todas as alterações necessárias para o Mu
 ### 3️⃣ Sobre PWA:
 
 **Perguntas:**
+
 - Prioridade offline: Quais dados cachear? (Sugestão: Transações últimos 3 meses + Dashboard)
 - Notificações push já na v2.0? (Sugestão: Não, deixar para v2.1)
 - Ícones personalizados por workspace no PWA? (Sugestão: Não inicialmente)
@@ -236,6 +265,7 @@ Criei um **único arquivo SQL** com todas as alterações necessárias para o Mu
 ### 4️⃣ Priorização de features:
 
 **Ordene por prioridade (1-10):**
+
 ```
 [ ] Multi-Workspace (essencial para v2.0)
 [ ] PWA Básico (manifest + offline)
@@ -272,9 +302,9 @@ Criei um **único arquivo SQL** com todas as alterações necessárias para o Mu
 4. **Alguma feature adicional que não listei?**
 
 Após sua resposta, criarei:
+
 1. ✅ O arquivo SQL completo
 2. ✅ A estrutura de pastas necessária
 3. ✅ Os componentes base
 
 **Aguardando sua aprovação para começar!** 🚀
-

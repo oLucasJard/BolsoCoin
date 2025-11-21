@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import { Toaster } from "sonner";
+import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import "./globals.css";
 
 const inter = Inter({ 
@@ -29,16 +30,41 @@ export default function RootLayout({
     <html lang="pt-BR" className="h-full">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#FFD100" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="BolsoCoin" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={`${inter.variable} ${sora.variable} font-sans h-full antialiased`}>
-        {children}
+        <WorkspaceProvider>
+          {children}
+        </WorkspaceProvider>
         <Toaster position="top-center" richColors toastOptions={{
           style: {
             background: '#1A1A1A',
             color: '#FFFFFF',
             border: '1px solid #FFD100',
           },
+        }} />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(
+                  (registration) => {
+                    console.log('SW registered:', registration);
+                  },
+                  (error) => {
+                    console.error('SW registration failed:', error);
+                  }
+                );
+              });
+            }
+          `
         }} />
       </body>
     </html>

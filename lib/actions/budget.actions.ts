@@ -8,6 +8,7 @@ export async function createBudget(data: {
   amount: number;
   month: number;
   year: number;
+  workspaceId: string;
 }) {
   const supabase = await createClient();
   const {
@@ -20,6 +21,7 @@ export async function createBudget(data: {
     .from('budgets')
     .insert({
       user_id: user.id,
+      workspace_id: data.workspaceId,
       category_name: data.categoryName,
       amount: data.amount,
       month: data.month,
@@ -34,7 +36,7 @@ export async function createBudget(data: {
   return budget;
 }
 
-export async function getBudgets(month?: number, year?: number) {
+export async function getBudgets(workspaceId: string, month?: number, year?: number) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -50,6 +52,7 @@ export async function getBudgets(month?: number, year?: number) {
     .from('budgets')
     .select('*')
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .eq('month', targetMonth)
     .eq('year', targetYear);
 
@@ -100,6 +103,7 @@ export async function createGoal(data: {
   description?: string;
   targetAmount: number;
   deadline?: Date;
+  workspaceId: string;
 }) {
   const supabase = await createClient();
   const {
@@ -112,6 +116,7 @@ export async function createGoal(data: {
     .from('goals')
     .insert({
       user_id: user.id,
+      workspace_id: data.workspaceId,
       title: data.title,
       description: data.description,
       target_amount: data.targetAmount,
@@ -126,7 +131,7 @@ export async function createGoal(data: {
   return goal;
 }
 
-export async function getGoals() {
+export async function getGoals(workspaceId: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -138,6 +143,7 @@ export async function getGoals() {
     .from('goals')
     .select('*')
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -195,7 +201,7 @@ export async function deleteGoal(id: string) {
   revalidatePath('/orcamentos');
 }
 
-export async function getBudgetComparison(month?: number, year?: number) {
+export async function getBudgetComparison(workspaceId: string, month?: number, year?: number) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -212,6 +218,7 @@ export async function getBudgetComparison(month?: number, year?: number) {
     .from('budgets')
     .select('*')
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .eq('month', targetMonth)
     .eq('year', targetYear);
 
@@ -223,6 +230,7 @@ export async function getBudgetComparison(month?: number, year?: number) {
     .from('transactions')
     .select('*')
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .eq('type', 'expense')
     .gte('date', startDate.toISOString())
     .lte('date', endDate.toISOString());

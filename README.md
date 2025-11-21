@@ -2,6 +2,8 @@
 
 > Central de Gerenciamento de Carteira com IA - Zero Fricção para Entrada de Dados
 
+**🎉 Novidade: MVP v2.0 com Multi-Workspace e PWA!** - [Ver documentação completa](docs/MVP_V2_COMPLETO.md)
+
 ## 🎯 Visão Geral
 
 O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando financeiro pessoal** com foco em **zero fricção de entrada de dados**. Ele usa **IA** para entender linguagem natural (texto e áudio) e imagens (recibos) para automatizar completamente o rastreamento de despesas e receitas.

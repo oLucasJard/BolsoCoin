@@ -14,6 +14,7 @@ export async function createTransaction(data: {
   imageUrl?: string;
   rawInput?: string;
   source?: string;
+  workspaceId: string;
 }) {
   const supabase = await createClient();
   
@@ -29,6 +30,7 @@ export async function createTransaction(data: {
     .from('transactions')
     .insert({
       user_id: user.id,
+      workspace_id: data.workspaceId,
       amount: data.amount,
       description: data.description,
       type: data.type,
@@ -50,12 +52,15 @@ export async function createTransaction(data: {
   return transaction;
 }
 
-export async function getTransactions(filters?: {
-  startDate?: Date;
-  endDate?: Date;
-  type?: 'income' | 'expense';
-  categoryName?: string;
-}) {
+export async function getTransactions(
+  workspaceId: string,
+  filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    type?: 'income' | 'expense';
+    categoryName?: string;
+  }
+) {
   const supabase = await createClient();
   
   const {
@@ -70,6 +75,7 @@ export async function getTransactions(filters?: {
     .from('transactions')
     .select('*')
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .order('date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(100);
@@ -209,7 +215,7 @@ export async function processImageInput(imageBase64: string) {
   };
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(workspaceId: string) {
   const supabase = await createClient();
   
   const {
@@ -229,6 +235,7 @@ export async function getDashboardStats() {
     .from('transactions')
     .select('*')
     .eq('user_id', user.id)
+    .eq('workspace_id', workspaceId)
     .gte('date', startOfMonth.toISOString())
     .lte('date', endOfMonth.toISOString());
 

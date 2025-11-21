@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar Ícones BolsoCoin</title>
+</head>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #000;">
+    <h1 style="color: #FFD100;">Gerador de Ícones BolsoCoin</h1>
+    <p style="color: #fff;">Clique no botão abaixo para gerar os ícones do PWA:</p>
+    <button onclick="generateIcons()" style="background: #FFD100; color: #000; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+        Gerar Ícones
+    </button>
+    <div id="status" style="margin-top: 20px; color: #FFD100;"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Fundo amarelo
+            ctx.fillStyle = '#FFD100';
+            ctx.fillRect(0, 0, size, size);
+
+            // Emoji 💰
+            ctx.font = `${size * 0.6}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('💰', size / 2, size / 2);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        async function generateIcons() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<p>Gerando ícones...</p>';
+
+            for (const size of sizes) {
+                const dataUrl = generateIcon(size);
+                const link = document.createElement('a');
+                link.download = `icon-${size}x${size}.png`;
+                link.href = dataUrl;
+                link.click();
+                
+                status.innerHTML += `<p>✓ icon-${size}x${size}.png gerado</p>`;
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            status.innerHTML += '<p style="color: #0f0; font-weight: bold;">✓ Todos os ícones foram gerados! Mova-os para a pasta public/icons/</p>';
+        }
+    </script>
+</body>
+</html>
+

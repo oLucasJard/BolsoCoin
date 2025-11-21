@@ -10,32 +10,28 @@
 
 ### 🏆 Principais Concorrentes (Brasil 2024-2025)
 
-| App | Pontos Fortes | Pontos Fracos | Preço |
-|-----|---------------|---------------|-------|
-| **Mobills** | Integração bancária automática, múltiplas contas, relatórios avançados | Interface complexa, curva de aprendizado | R$ 9,90/mês |
-| **Organizze** | Simplicidade, orçamento flexível, categorias customizáveis | Sem IA, input manual trabalhoso | R$ 7,90/mês |
-| **GuiaBolso** | Open Banking, análise de crédito, gratuito | Monetização via empréstimos, anúncios | Grátis |
-| **Wallet by BudgetBakers** | Compartilhamento familiar, múltiplas contas, design moderno | Limitado para empresas | $4.99/mês |
-| **Spendee** | Design excelente, gastos pessoais/familiares/empresariais | Sem IA avançada, foco europeu | €2.99/mês |
+| App                        | Pontos Fortes                                                          | Pontos Fracos                            | Preço       |
+| -------------------------- | ---------------------------------------------------------------------- | ---------------------------------------- | ----------- |
+| **Mobills**                | Integração bancária automática, múltiplas contas, relatórios avançados | Interface complexa, curva de aprendizado | R$ 9,90/mês |
+| **Organizze**              | Simplicidade, orçamento flexível, categorias customizáveis             | Sem IA, input manual trabalhoso          | R$ 7,90/mês |
+| **GuiaBolso**              | Open Banking, análise de crédito, gratuito                             | Monetização via empréstimos, anúncios    | Grátis      |
+| **Wallet by BudgetBakers** | Compartilhamento familiar, múltiplas contas, design moderno            | Limitado para empresas                   | $4.99/mês   |
+| **Spendee**                | Design excelente, gastos pessoais/familiares/empresariais              | Sem IA avançada, foco europeu            | €2.99/mês   |
 
 ### 🎯 Oportunidades de Mercado Identificadas
 
 1. **Gap de Multi-Workspace Real**
    - Nenhum app brasileiro oferece separação completa entre contextos (pessoal, empresa, igreja, etc)
    - Usuários precisam usar múltiplos apps ou fazer "gambiarras" com categorias
-   
 2. **IA Subutilizada**
    - Apps existentes têm IA básica ou nenhuma
    - Input manual ainda é a norma (50%+ do tempo gasto)
-   
 3. **Complexidade vs Simplicidade**
    - Apps simples: faltam recursos
    - Apps completos: complexos demais
-   
 4. **Custo Elevado**
    - Média: R$ 8-10/mês (R$ 96-120/ano)
    - Freemium limitado demais
-   
 5. **Falta de Flexibilidade**
    - Não atendem freelancers, pastores, pequenos empresários
    - Forçam modelo "um tamanho serve para todos"
@@ -46,19 +42,15 @@
    - Funcionalidade offline
    - Instalação sem lojas de app
    - Performance próxima a apps nativos
-   
 2. **IA Generativa** (ChatGPT/GPT-4)
    - Usuários esperam processamento de linguagem natural
    - Automação inteligente
-   
 3. **Open Banking** (Obrigatório no Brasil)
    - Integração com bancos facilitada
    - Transparência e segurança
-   
 4. **Gamificação Financeira**
    - Educação através de jogos
    - Recompensas por hábitos saudáveis
-   
 5. **Multi-Dispositivo & Sincronização**
    - Usuários querem acesso de qualquer lugar
    - Desktop, mobile, tablet
@@ -85,6 +77,7 @@
 ### 1. 🏢 **Multi-Workspace (Feature Estrela)**
 
 #### Conceito
+
 Permitir que o usuário crie "espaços" isolados para diferentes contextos da vida:
 
 ```
@@ -112,12 +105,14 @@ Permitir que o usuário crie "espaços" isolados para diferentes contextos da vi
 #### Funcionalidades
 
 **Criação de Workspaces:**
+
 - Nome customizável
 - Ícone/Emoji personalizado
 - Cor de identificação
 - Tipo: Pessoal, Empresa, Igreja/ONG, Projeto
 
 **Isolamento Total:**
+
 - Cada workspace tem seu próprio:
   - Dashboard
   - Transações
@@ -127,16 +122,19 @@ Permitir que o usuário crie "espaços" isolados para diferentes contextos da vi
   - Relatórios
 
 **Troca Rápida:**
+
 - Dropdown no header para alternar
 - Atalhos de teclado (Ctrl+1, Ctrl+2...)
 - Widget de resumo (visão de todos os workspaces)
 
 **Compartilhamento (PRO):**
+
 - Convidar colaboradores
 - Permissões (visualização, edição, admin)
 - Útil para: sócios, contador, tesoureiro da igreja
 
 **Dashboard Consolidado:**
+
 - Visão geral de TODOS os workspaces
 - Comparação mês a mês
 - Fluxo de caixa total
@@ -144,6 +142,7 @@ Permitir que o usuário crie "espaços" isolados para diferentes contextos da vi
 #### Casos de Uso Reais
 
 **1. Freelancer com CNPJ:**
+
 ```
 Workspace "Pessoal"
 ├── Salário PJ: R$ 8.000
@@ -157,6 +156,7 @@ Workspace "Empresa (CNPJ)"
 ```
 
 **2. Pastor de Igreja:**
+
 ```
 Workspace "Família"
 ├── Salário Igreja: R$ 4.000
@@ -170,6 +170,7 @@ Workspace "Igreja Novo Horizonte"
 ```
 
 **3. Microempresário:**
+
 ```
 Workspace "Casa"
 ├── Pró-labore: R$ 5.000
@@ -188,11 +189,13 @@ Workspace "E-commerce"
 ### 2. 📱 **PWA (Progressive Web App)**
 
 #### O que é PWA?
+
 Um PWA é uma aplicação web que funciona como um app nativo, mas sem precisar de lojas de aplicativos.
 
 #### Benefícios para o BolsoCoin
 
 **Para o Usuário:**
+
 - ✅ **Instalar na tela inicial** (Android e iPhone)
 - ✅ **Funciona offline** (visualizar transações, adicionar pendentes)
 - ✅ **Notificações push** (lembretes, alertas de limite)
@@ -201,6 +204,7 @@ Um PWA é uma aplicação web que funciona como um app nativo, mas sem precisar 
 - ✅ **Sem ocupar muito espaço** (muito menor que app nativo)
 
 **Para o Negócio:**
+
 - 💰 **Sem taxas de Apple/Google** (30%)
 - 🚀 **Deploy instantâneo** (não precisa aprovação)
 - 🛠️ **Manutenção única** (uma codebase)
@@ -210,6 +214,7 @@ Um PWA é uma aplicação web que funciona como um app nativo, mas sem precisar 
 #### Implementação Técnica
 
 **1. Service Worker:**
+
 ```javascript
 // Cache de assets essenciais
 // Funcionalidade offline
@@ -217,6 +222,7 @@ Um PWA é uma aplicação web que funciona como um app nativo, mas sem precisar 
 ```
 
 **2. Web App Manifest:**
+
 ```json
 {
   "name": "BolsoCoin",
@@ -231,12 +237,14 @@ Um PWA é uma aplicação web que funciona como um app nativo, mas sem precisar 
 ```
 
 **3. Funcionalidades Offline:**
+
 - Visualizar transações (cache local)
 - Adicionar transações (sync quando online)
 - Ver gráficos (dados em cache)
 - Receber notificações
 
 **4. Notificações Push:**
+
 ```javascript
 // Lembretes de contas a pagar
 // Alertas de limite de orçamento
@@ -249,78 +257,29 @@ Um PWA é uma aplicação web que funciona como um app nativo, mas sem precisar 
 #### Melhorias na IA Existente
 
 **Processamento de Linguagem Natural:**
+
 - Entender contexto: "Comprei material para a empresa"
   - IA detecta workspace "Empresa"
   - Categoriza automaticamente
-  
+
 **Aprendizado Contínuo:**
+
 - IA aprende com correções do usuário
 - Melhora sugestões de categorias
 - Detecta padrões pessoais
 
 **Análise Preditiva:**
+
 - Prever gastos do próximo mês
 - Alertar sobre possíveis problemas
 - Sugerir economias
-
-#### Novos Recursos IA
-
-**1. Assistente Financeiro (Chatbot):**
-```
-Usuário: "Quanto gastei com alimentação esse mês?"
-IA: "Você gastou R$ 850 em alimentação em novembro.
-     Isso é 15% a mais que outubro (R$ 740).
-     Quer ver os detalhes?"
-
-Usuário: "Posso comprar um notebook de R$ 3.000?"
-IA: "Com base no seu padrão de gastos, você pode 
-     economizar R$ 3.000 em 4 meses se reduzir 
-     gastos com lazer em 20%. Quer criar uma meta?"
-```
-
-**2. Classificação Automática Inteligente:**
-- Detecta estabelecimento e categoriza
-- Aprende com transações similares
-- Sugere split (ex: compra no mercado = 60% alimentação, 40% limpeza)
-
-**3. Detecção de Anomalias:**
-- "Você gastou R$ 500 no cartão às 3h da manhã - isso é incomum"
-- "Cobrança duplicada detectada"
-- "Assinatura não utilizada há 3 meses"
-
-**4. Insights Personalizados:**
-- "Você gasta 40% do salário com alimentação fora (média é 15%)"
-- "Se investir R$ 500/mês, terá R$ 50.000 em 5 anos"
-- "Melhor dia para fazer compras: terça-feira (economia média de 8%)"
-
-### 4. 🔐 **Open Banking (Integração Bancária)**
-
-#### O que é?
-Open Banking permite que o BolsoCoin se conecte com bancos de forma oficial e segura.
-
-#### Implementação
-
-**Fase 1 (Q2 2025):**
-- Integração com bancos principais (Banco do Brasil, Caixa, Itaú, Bradesco, Santander)
-- Importação automática de transações
-- Saldo em tempo real
-
-**Fase 2 (Q3 2025):**
-- Cartões de crédito
-- Investimentos (saldo)
-- Fintechs (Nubank, Inter, C6)
-
-**Segurança:**
-- Oauth 2.0 / Open Banking Brasil
-- Sem acesso a senhas
-- Criptografia ponta a ponta
-- Usuário controla permissões
 
 ### 5. 📊 **Relatórios e Análises PRO**
 
 #### Relatórios Avançados
 
 **1. Relatório Mensal Completo:**
+
 - Receitas por fonte
 - Despesas por categoria
 - Comparativo com mês anterior
@@ -328,17 +287,20 @@ Open Banking permite que o BolsoCoin se conecte com bancos de forma oficial e se
 - Exportar PDF/Excel
 
 **2. Análise de Fluxo de Caixa:**
+
 - Entrada vs Saída (diário, semanal, mensal)
 - Previsão de saldo futuro
 - Identificação de padrões
 
 **3. Relatórios para Empresas:**
+
 - DRE Simplificado (Receitas - Despesas)
 - Controle de Impostos
 - Relatório por cliente/projeto
 - Margem de lucro
 
 **4. Prestação de Contas (Igreja/ONG):**
+
 - Relatório de dízimos e ofertas
 - Gastos por projeto
 - Transparência total
@@ -348,65 +310,28 @@ Open Banking permite que o BolsoCoin se conecte com bancos de forma oficial e se
 
 #### Melhorias
 
-**Metas com IA:**
-- IA sugere metas realistas
-- Acompanha progresso
-- Ajusta automaticamente
-- Celebra conquistas (gamificação)
-
 **Orçamentos Inteligentes:**
+
 - Aprende com histórico
 - Sugere limites por categoria
 - Alerta antes de estourar (não depois)
 - Rollover (sobra do mês passa para o próximo)
 
 **Metas Compartilhadas:**
+
 - Família: "Juntar para viagem"
 - Casal: "Comprar casa"
 - Sócios: "Expandir empresa"
 
-### 7. 🎮 **Gamificação e Educação Financeira**
-
-#### Sistema de Conquistas
-
-```
-🏆 Primeiros Passos
-   ├── Primeira transação registrada
-   ├── 7 dias consecutivos de uso
-   └── Primeira meta criada
-
-💰 Economizador
-   ├── Economizou 10% do salário
-   ├── 3 meses consecutivos dentro do orçamento
-   └── Primeira meta alcançada
-
-📊 Analista
-   ├── Exportou primeiro relatório
-   ├── Criou 5 workspaces
-   └── Usou IA 100 vezes
-
-🎓 Educado Financeiramente
-   ├── Completou 10 lições
-   ├── Quiz com 80%+ de acerto
-   └── Compartilhou conhecimento
-```
-
 #### Conteúdo Educacional
 
 **Lições Interativas:**
+
 - "Como criar um orçamento"
 - "Investimentos para iniciantes"
 - "Reduzindo dívidas"
 - "Gestão financeira para freelancers"
 - "Finanças para igrejas"
-
-**Formato:**
-- Vídeos curtos (2-3 min)
-- Artigos práticos
-- Quiz interativo
-- Certificado digital
-
----
 
 ## 🏗️ Arquitetura Técnica v2.0
 
@@ -471,7 +396,7 @@ CREATE TABLE workspace_members (
 );
 
 -- Transações agora pertencem a um workspace
-ALTER TABLE transactions 
+ALTER TABLE transactions
 ADD COLUMN workspace_id UUID REFERENCES workspaces(id);
 
 -- Orçamentos por workspace
@@ -514,6 +439,7 @@ lib/
 ### 🎯 Fase 1: Fundação (Dezembro 2024 - Janeiro 2025)
 
 **Semanas 1-2: Multi-Workspace MVP**
+
 - [ ] Database schema para workspaces
 - [ ] API CRUD workspaces
 - [ ] UI: Criar/editar workspace
@@ -521,6 +447,7 @@ lib/
 - [ ] Migração: Transações existentes para workspace "Pessoal" padrão
 
 **Semanas 3-4: PWA Básico**
+
 - [ ] Configurar Service Worker
 - [ ] Web App Manifest
 - [ ] Ícones e splash screens
@@ -528,6 +455,7 @@ lib/
 - [ ] Prompt de instalação
 
 **Semanas 5-6: Testes e Refinamento**
+
 - [ ] Testes multi-workspace
 - [ ] Testes PWA em múltiplos dispositivos
 - [ ] Correções de bugs
@@ -540,12 +468,14 @@ lib/
 ### 🚀 Fase 2: Recursos PRO (Fevereiro - Março 2025)
 
 **Semanas 1-2: Compartilhamento de Workspaces**
+
 - [ ] Convite de membros
 - [ ] Sistema de permissões
 - [ ] Notificações de atividade
 - [ ] Audit log (quem fez o quê)
 
 **Semanas 3-4: Relatórios Avançados**
+
 - [ ] Relatório mensal PDF
 - [ ] DRE simplificado
 - [ ] Análise de fluxo de caixa
@@ -553,12 +483,14 @@ lib/
 - [ ] Exportação Excel
 
 **Semanas 5-6: Notificações Push PWA**
+
 - [ ] Setup Firebase Cloud Messaging
 - [ ] Lembrete de contas
 - [ ] Alertas de orçamento
 - [ ] Notícias e dicas
 
 **Semanas 7-8: Dashboard Consolidado**
+
 - [ ] Visão geral de todos workspaces
 - [ ] Comparativos
 - [ ] Métricas agregadas
@@ -570,17 +502,20 @@ lib/
 ### 🌟 Fase 3: IA Avançada (Abril - Maio 2025)
 
 **Semanas 1-2: Assistente Financeiro (Chatbot)**
+
 - [ ] Integração LangChain
 - [ ] Interface de chat
 - [ ] Comandos via texto
 - [ ] Respostas contextualizadas
 
 **Semanas 3-4: Análise Preditiva**
+
 - [ ] Modelo de previsão de gastos
 - [ ] Alertas proativos
 - [ ] Sugestões de economia
 
 **Semanas 5-6: Aprendizado Contínuo**
+
 - [ ] Pinecone para memória
 - [ ] Fine-tuning com dados do usuário
 - [ ] Melhoria nas categorizações
@@ -592,12 +527,14 @@ lib/
 ### 🏦 Fase 4: Open Banking (Junho - Agosto 2025)
 
 **Semanas 1-4: Integração Pluggy/Belvo**
+
 - [ ] Setup com provedor Open Banking
 - [ ] Fluxo de autenticação
 - [ ] Importação de transações
 - [ ] Sincronização automática
 
 **Semanas 5-8: Bancos Principais**
+
 - [ ] Banco do Brasil
 - [ ] Caixa Econômica
 - [ ] Itaú
@@ -605,12 +542,14 @@ lib/
 - [ ] Santander
 
 **Semanas 9-10: Fintechs**
+
 - [ ] Nubank
 - [ ] Inter
 - [ ] C6 Bank
 - [ ] PagBank
 
 **Semanas 11-12: Cartões e Investimentos**
+
 - [ ] Cartões de crédito
 - [ ] Saldo de investimentos
 - [ ] Conciliação automática
@@ -622,18 +561,21 @@ lib/
 ### 🎮 Fase 5: Gamificação (Setembro - Outubro 2025)
 
 **Semanas 1-2: Sistema de Conquistas**
+
 - [ ] Database de achievements
 - [ ] Lógica de desbloqueio
 - [ ] UI de conquistas
 - [ ] Notificações
 
 **Semanas 3-4: Conteúdo Educacional**
+
 - [ ] 20 lições escritas
 - [ ] 10 vídeos produzidos
 - [ ] Quiz interativo
 - [ ] Sistema de progresso
 
 **Semanas 5-6: Gamificação Social**
+
 - [ ] Ranking opcional
 - [ ] Compartilhar conquistas
 - [ ] Desafios comunitários
@@ -647,6 +589,7 @@ lib/
 ### 📦 Planos Propostos
 
 #### 🆓 **FREE (Gratuito Para Sempre)**
+
 ```
 ✅ 1 Workspace (Pessoal)
 ✅ Transações ilimitadas
@@ -661,11 +604,13 @@ lib/
 ❌ Relatórios avançados
 ❌ Exportação PDF/Excel
 ```
+
 **Objetivo**: Atrair usuários, provar valor
 
 ---
 
 #### 💼 **PRO (R$ 14,90/mês ou R$ 149/ano)**
+
 ```
 ✅ Tudo do FREE
 ✅ 5 Workspaces
@@ -680,11 +625,13 @@ lib/
 ❌ Open Banking
 ❌ Workspaces ilimitados
 ```
+
 **Público-alvo**: Freelancers, pequenos empreendedores, usuários avançados
 
 ---
 
 #### 🚀 **BUSINESS (R$ 29,90/mês ou R$ 299/ano)**
+
 ```
 ✅ Tudo do PRO
 ✅ Workspaces ilimitados
@@ -697,11 +644,13 @@ lib/
 ✅ Onboarding personalizado
 ✅ Suporte VIP (chat direto)
 ```
+
 **Público-alvo**: Empresas, contadores, gestores financeiros, igrejas/ONGs
 
 ---
 
 #### ⛪ **CHURCHES & NGOs (R$ 99/mês - Workspace compartilhado)**
+
 ```
 Plano especial para igrejas e organizações:
 ✅ 1 Workspace organizacional
@@ -713,6 +662,7 @@ Plano especial para igrejas e organizações:
 ✅ Treinamento para tesoureiro
 ✅ Selo de transparência público
 ```
+
 **Público-alvo**: Igrejas, ONGs, associações
 
 ---
@@ -720,6 +670,7 @@ Plano especial para igrejas e organizações:
 ### 💵 Projeção de Receita (Ano 1 pós v2.0)
 
 **Cenário Conservador:**
+
 ```
 Mês 1-3 (Lançamento):
 ├── 1.000 usuários FREE
@@ -743,6 +694,7 @@ Mês 12 (Consolidação):
 ```
 
 **Cenário Otimista (Com Open Banking e Marketing):**
+
 ```
 Ano 1: R$ 300.000
 Ano 2: R$ 800.000
@@ -755,39 +707,35 @@ Ano 3: R$ 2.000.000+
 
 ### Por que escolher BolsoCoin 2.0?
 
-| Recurso | BolsoCoin 2.0 | Mobills | Organizze | GuiaBolso | Spendee |
-|---------|---------------|---------|-----------|-----------|---------|
-| **Multi-Workspace Real** | ✅ Ilimitado | ❌ | ❌ | ❌ | ⚠️ Limitado |
-| **IA Avançada (GPT-4o)** | ✅ | ❌ | ❌ | ⚠️ Básica | ❌ |
-| **Input por Voz** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Input por Imagem** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **PWA (Funciona Offline)** | ✅ | ❌ | ❌ | ❌ | ⚠️ Limitado |
-| **Open Banking** | ✅ (v2.2) | ✅ | ❌ | ✅ | ❌ |
-| **Plano Gratuito Robusto** | ✅ | ⚠️ Limitado | ⚠️ Limitado | ✅ | ⚠️ Limitado |
-| **Foco em Empresas/Igrejas** | ✅ | ❌ | ❌ | ❌ | ⚠️ Parcial |
-| **Design Moderno** | ✅ C6 Bank | ⚠️ Ok | ⚠️ Ok | ❌ Datado | ✅ |
-| **Preço PRO** | R$ 14,90 | R$ 9,90 | R$ 7,90 | Grátis | €2.99 |
+| Recurso                      | BolsoCoin 2.0 | Mobills     | Organizze   | GuiaBolso | Spendee     |
+| ---------------------------- | ------------- | ----------- | ----------- | --------- | ----------- |
+| **Multi-Workspace Real**     | ✅ Ilimitado  | ❌          | ❌          | ❌        | ⚠️ Limitado |
+| **IA Avançada (GPT-4o)**     | ✅            | ❌          | ❌          | ⚠️ Básica | ❌          |
+| **Input por Voz**            | ✅            | ❌          | ❌          | ❌        | ❌          |
+| **Input por Imagem**         | ✅            | ❌          | ❌          | ❌        | ❌          |
+| **PWA (Funciona Offline)**   | ✅            | ❌          | ❌          | ❌        | ⚠️ Limitado |
+| **Open Banking**             | ✅ (v2.2)     | ✅          | ❌          | ✅        | ❌          |
+| **Plano Gratuito Robusto**   | ✅            | ⚠️ Limitado | ⚠️ Limitado | ✅        | ⚠️ Limitado |
+| **Foco em Empresas/Igrejas** | ✅            | ❌          | ❌          | ❌        | ⚠️ Parcial  |
+| **Design Moderno**           | ✅ C6 Bank    | ⚠️ Ok       | ⚠️ Ok       | ❌ Datado | ✅          |
+| **Preço PRO**                | R$ 14,90      | R$ 9,90     | R$ 7,90     | Grátis    | €2.99       |
 
 ### 🌟 Nossos Diferenciais Únicos
 
 1. **IA que Realmente Funciona**
    - Não é marketing, é realidade
    - Economiza 80% do tempo de input
-   
 2. **Flexibilidade Total**
    - Adapta-se a QUALQUER modelo de vida/trabalho
    - Freelancer, empresário, pastor, profissional liberal
-   
 3. **Brasileiro**
    - Pensado para o contexto brasileiro
    - Suporte em português
    - Integração com bancos BR
-   
 4. **Transparência**
    - Preços claros
    - Sem taxas escondidas
    - Código aberto (core features)
-   
 5. **Comunidade**
    - Fórum de usuários
    - Conteúdo educacional gratuito
@@ -800,11 +748,13 @@ Ano 3: R$ 2.000.000+
 ### 👥 Time Necessário
 
 **Mínimo Viável (MVP v2.0):**
+
 - 1 Full-Stack Developer (Next.js + Supabase)
 - 1 UI/UX Designer (part-time)
 - Tempo: 3 meses
 
 **Time Ideal (Launch Completo):**
+
 - 2 Full-Stack Developers
 - 1 Mobile/PWA Specialist
 - 1 IA/ML Engineer (part-time)
@@ -815,6 +765,7 @@ Ano 3: R$ 2.000.000+
 ### 💰 Custos Estimados
 
 **Desenvolvimento (6 meses):**
+
 ```
 2 Devs Full-Stack: R$ 15.000/mês x 2 = R$ 30.000
 1 Designer: R$ 6.000/mês = R$ 6.000
@@ -824,6 +775,7 @@ Total 6 meses: R$ 264.000
 ```
 
 **Infraestrutura (Mensal):**
+
 ```
 Vercel PRO: $20/mês
 Supabase PRO: $25/mês
@@ -833,6 +785,7 @@ Total: ~R$ 2.500/mês
 ```
 
 **Marketing (Lançamento):**
+
 ```
 Ads (Google + Meta): R$ 5.000/mês x 3 = R$ 15.000
 Influencers/Creators: R$ 10.000
@@ -841,6 +794,7 @@ Total: R$ 28.000
 ```
 
 **Investimento Total Ano 1:**
+
 ```
 Desenvolvimento: R$ 264.000
 Infra (12 meses): R$ 30.000
@@ -859,12 +813,10 @@ TOTAL: R$ 372.000
    - Landing page com countdown
    - Early bird: 50% OFF no primeiro ano PRO
    - Meta: 1.000 inscritos
-   
 2. **Conteúdo Educacional**
    - Blog: "Como organizar finanças de múltiplas empresas"
    - YouTube: "BolsoCoin 2.0 - Prévia"
    - Instagram: Bastidores do desenvolvimento
-   
 3. **Parcerias Estratégicas**
    - Influencers de finanças (Thiago Nigro, Me Poupe)
    - Associações de freelancers
@@ -875,11 +827,9 @@ TOTAL: R$ 372.000
 1. **Product Hunt**
    - Launch no Product Hunt
    - Meta: Top 5 do dia
-   
 2. **Mídia Especializada**
    - Press release para TechCrunch Brasil, StartSe
    - Podcast rounds (Hipsters Ponto Tech, etc)
-   
 3. **Campanha de Ads**
    - Google Ads: "gerenciador financeiro múltiplas empresas"
    - Facebook/Instagram: Público 25-45 anos, empresários
@@ -890,11 +840,9 @@ TOTAL: R$ 372.000
 1. **Growth Loops**
    - Referral program: Indicou, ganhou 1 mês PRO
    - Templates de workspaces compartilháveis
-   
 2. **Conteúdo SEO**
    - 20 artigos otimizados
    - Foco: Long-tail keywords
-   
 3. **Comunidade**
    - Discord/WhatsApp de usuários
    - Webinars mensais
@@ -906,37 +854,40 @@ TOTAL: R$ 372.000
 
 ### Riscos Técnicos
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|-------|---------------|---------|-----------|
-| **Complexidade Multi-Workspace** | Alta | Alto | Prototipagem intensiva, testes A/B |
-| **Performance PWA** | Média | Médio | Otimização desde o início, monitoring |
-| **Custos OpenAI API** | Alta | Alto | Cache inteligente, rate limiting, freemium limits |
-| **Segurança Open Banking** | Média | Crítico | Auditoria de segurança, certificações |
+| Risco                            | Probabilidade | Impacto | Mitigação                                         |
+| -------------------------------- | ------------- | ------- | ------------------------------------------------- |
+| **Complexidade Multi-Workspace** | Alta          | Alto    | Prototipagem intensiva, testes A/B                |
+| **Performance PWA**              | Média         | Médio   | Otimização desde o início, monitoring             |
+| **Custos OpenAI API**            | Alta          | Alto    | Cache inteligente, rate limiting, freemium limits |
+| **Segurança Open Banking**       | Média         | Crítico | Auditoria de segurança, certificações             |
 
 ### Riscos de Negócio
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|-------|---------------|---------|-----------|
-| **Baixa adesão ao PRO** | Média | Alto | Plano FREE robusto, value prop clara |
-| **Competição de apps grandes** | Alta | Médio | Foco em nicho (multi-workspace) |
-| **Custos operacionais altos** | Média | Alto | Escalabilidade gradual, pricing dinâmico |
-| **Churn elevado** | Média | Alto | Onboarding excelente, suporte rápido |
+| Risco                          | Probabilidade | Impacto | Mitigação                                |
+| ------------------------------ | ------------- | ------- | ---------------------------------------- |
+| **Baixa adesão ao PRO**        | Média         | Alto    | Plano FREE robusto, value prop clara     |
+| **Competição de apps grandes** | Alta          | Médio   | Foco em nicho (multi-workspace)          |
+| **Custos operacionais altos**  | Média         | Alto    | Escalabilidade gradual, pricing dinâmico |
+| **Churn elevado**              | Média         | Alto    | Onboarding excelente, suporte rápido     |
 
 ---
 
 ## ✅ Métricas de Sucesso (KPIs)
 
 ### Adoção
+
 - **DAU** (Daily Active Users): Meta 30% dos registrados
 - **Retention D7**: Meta 40%
 - **Retention D30**: Meta 25%
 
 ### Receita
+
 - **MRR** (Monthly Recurring Revenue): Meta R$ 10.000 (Mês 6)
 - **Conversion FREE → PRO**: Meta 5%
 - **LTV** (Lifetime Value): Meta R$ 500/usuário PRO
 
 ### Produto
+
 - **NPS** (Net Promoter Score): Meta 50+
 - **Workspaces criados/usuário**: Meta 2.5
 - **Transações via IA**: Meta 70%+
@@ -975,17 +926,14 @@ TOTAL: R$ 372.000
 1. **Validação com Usuários** (1-2 semanas)
    - Entrevistas com 20 usuários atuais
    - Perguntas: "Você pagaria? Quanto? Por quê?"
-   
 2. **Protótipo Figma** (1 semana)
    - Multi-workspace flow
    - Dashboard consolidado
    - Mobile PWA screens
-   
 3. **Proof of Concept Técnico** (2 semanas)
    - Database multi-tenant
    - Service Worker básico
    - Performance tests
-   
 4. **Decisão GO/NO-GO** (1 semana)
    - Análise de viabilidade
    - Securing de investimento/time
@@ -1010,4 +958,3 @@ TOTAL: R$ 372.000
 ---
 
 **Perguntas? Sugestões? Vamos discutir!** 💬
-

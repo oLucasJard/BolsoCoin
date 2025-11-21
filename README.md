@@ -15,19 +15,23 @@ O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando
 ## 🚀 Stack Tecnológico
 
 ### Backend & Database
+
 - [Next.js 15](https://nextjs.org/) - Framework Full-Stack com App Router e Server Actions
 - [Supabase](https://supabase.com/) - Backend as a Service (Database + Auth)
 - PostgreSQL - Banco de dados relacional com Row Level Security
 
 ### Autenticação
+
 - [Supabase Auth](https://supabase.com/auth) - Autenticação completa com login social, 2FA e mais
 
 ### Inteligência Artificial
+
 - [OpenAI GPT-4o](https://openai.com/) - Interpretação de texto e imagem (Vision/OCR)
 - [OpenAI Whisper](https://openai.com/research/whisper) - Transcrição de áudio para texto
 - **Function Calling** - Extração estruturada de dados de linguagem natural
 
 ### Frontend & UI
+
 - [React 18](https://react.dev/) - Biblioteca JavaScript para interfaces
 - [TypeScript](https://www.typescriptlang.org/) - Tipagem estática
 - [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitário
@@ -35,6 +39,7 @@ O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando
 - [Recharts](https://recharts.org/) - Gráficos e visualizações
 
 ### Integrations
+
 - [Telegraf](https://telegraf.js.org/) - Framework para Bot do Telegram
 - [Vercel](https://vercel.com/) - Hospedagem e deployment
 
@@ -43,17 +48,20 @@ O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando
 ### ✨ Página Mágica (MVP Core Feature)
 
 **1. Input por Texto**
+
 - Digite em linguagem natural: "Café 15 reais" ou "Recebi 5000 do cliente X"
 - IA extrai automaticamente: valor, tipo, categoria, fornecedor
 - Cartão de confirmação antes de salvar
 
 **2. Input por Áudio** ✅
+
 - Grave um áudio falando a transação
 - Whisper transcreve para texto automaticamente
 - Processamento automático igual ao texto
 - Interface otimizada para mobile
 
 **3. Input por Imagem**
+
 - Tire foto de cupom fiscal ou recibo
 - GPT-4o Vision extrai: valor, estabelecimento, data
 - Confirmação visual com a imagem
@@ -244,6 +252,7 @@ Toda a documentação foi organizada na pasta [`docs/`](./docs/):
 ## 🎯 Roadmap
 
 ### ✅ MVP (Concluído)
+
 - [x] Autenticação com Supabase
 - [x] Dashboard com estatísticas
 - [x] Página Mágica - Input por texto
@@ -257,6 +266,7 @@ Toda a documentação foi organizada na pasta [`docs/`](./docs/):
 - [x] Bot do Telegram (estrutura básica)
 
 ### 🔜 Próximas Melhorias
+
 - [ ] Bot do Telegram - Processamento completo
 - [ ] Exportação de dados (CSV, PDF)
 - [ ] Notificações inteligentes

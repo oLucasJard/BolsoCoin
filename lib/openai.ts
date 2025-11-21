@@ -1,10 +1,23 @@
 import OpenAI from 'openai';
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy loading do cliente OpenAI para evitar erros no build
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAIClient() {
+  if (!openaiInstance) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY não configurada. Configure a variável de ambiente.');
+    }
+    openaiInstance = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiInstance;
+}
 
 export const extractTransactionFromText = async (text: string) => {
+  const openai = getOpenAIClient();
+  
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
@@ -34,6 +47,8 @@ Responda APENAS com um JSON válido, sem texto adicional.`,
 };
 
 export const extractTransactionFromImage = async (imageBase64: string) => {
+  const openai = getOpenAIClient();
+  
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
@@ -70,6 +85,8 @@ Responda APENAS com um JSON válido, sem texto adicional.`,
 };
 
 export const transcribeAudio = async (audioFile: File) => {
+  const openai = getOpenAIClient();
+  
   const transcription = await openai.audio.transcriptions.create({
     file: audioFile,
     model: 'whisper-1',
@@ -78,4 +95,3 @@ export const transcribeAudio = async (audioFile: File) => {
 
   return transcription.text;
 };
-

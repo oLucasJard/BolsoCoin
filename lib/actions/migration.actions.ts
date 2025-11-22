@@ -69,29 +69,23 @@ export async function migrateDataToWorkspaces(): Promise<{
         };
       }
 
-      // Adicionar o usuário como owner do workspace
-      const { error: memberError } = await supabase
-        .from('workspace_members')
-        .insert({
-          workspace_id: newWorkspace.id,
-          user_id: user.id,
-          role: 'owner',
-          permissions: {
-            can_view: true,
-            can_create: true,
-            can_edit: true,
-            can_delete: true,
-            can_manage_members: true,
-          },
-        });
+      // TEMPORÁRIO: Comentado para evitar recursão no RLS
+      // A verificação de ownership é feita pela coluna owner_id na tabela workspaces
+      // TODO: Reimplementar quando as políticas RLS estiverem estáveis
+      
+      // const { error: memberError } = await supabase
+      //   .from('workspace_members')
+      //   .insert({
+      //     workspace_id: newWorkspace.id,
+      //     user_id: user.id,
+      //     role: 'owner',
+      //     permissions: { can_view: true, can_create: true, can_edit: true, can_delete: true, can_manage_members: true },
+      //   });
 
-      if (memberError) {
-        console.error('Erro ao adicionar membro:', memberError);
-        return {
-          success: false,
-          message: 'Erro ao configurar workspace padrão',
-        };
-      }
+      // if (memberError) {
+      //   console.error('Erro ao adicionar membro:', memberError);
+      //   return { success: false, message: 'Erro ao configurar workspace padrão' };
+      // }
 
       defaultWorkspaceId = newWorkspace.id;
     } else {

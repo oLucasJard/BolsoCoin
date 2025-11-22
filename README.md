@@ -40,9 +40,8 @@ O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando
 - [Lucide React](https://lucide.dev/) - Ícones modernos
 - [Recharts](https://recharts.org/) - Gráficos e visualizações
 
-### Integrations
+### Deployment
 
-- [Telegraf](https://telegraf.js.org/) - Framework para Bot do Telegram
 - [Vercel](https://vercel.com/) - Hospedagem e deployment
 
 ## 📋 Funcionalidades
@@ -74,15 +73,6 @@ O BolsoCoin não é "apenas mais um app de finanças". É um **centro de comando
 - **Metas Financeiras** - Acompanhe progresso de economias
 - **Alertas Inteligentes** - Notificação quando ultrapassar limite
 - **Progresso Visual** - Gráficos de barras e porcentagens
-
-### 🤖 Bot do Telegram
-
-- **/start** - Vincular conta
-- **/saldo** - Ver saldo atual
-- **/gastos_hoje** - Total gasto no dia
-- **Mensagem de texto** - Adicionar transação por texto
-- **Áudio** - Adicionar por voz (em breve)
-- **Foto** - Enviar foto do recibo (em breve)
 
 ### 📊 Dashboard
 
@@ -117,7 +107,6 @@ Antes de começar, você vai precisar:
 - [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
 - Conta no [Supabase](https://supabase.com/) (Grátis) - [Ver guia](./docs/GUIA_LOGIN_REAL.md)
 - Chave da [OpenAI API](https://platform.openai.com/) - [Ver guia](./docs/GUIA_OPENAI_API.md)
-- (Opcional) Bot do [Telegram](https://t.me/BotFather) para integração
 
 > 📖 **Documentação completa**: Consulte a pasta [`docs/`](./docs/) para guias detalhados
 
@@ -199,7 +188,6 @@ BolsoCoin/
 │   │   └── layout.tsx
 │   ├── auth/callback/          # Callback OAuth
 │   ├── api/
-│   │   ├── telegram-webhook/   # Webhook Telegram
 │   │   └── transcribe/         # API transcrição Whisper
 │   └── page.tsx                # Landing page
 ├── components/
@@ -220,8 +208,7 @@ BolsoCoin/
 │   │   ├── user.actions.ts
 │   │   ├── transaction.actions.ts
 │   │   └── budget.actions.ts   # Orçamentos e metas
-│   ├── openai.ts               # Integração OpenAI
-│   └── telegram-bot.ts         # Bot Telegram
+│   └── openai.ts               # Integração OpenAI
 ├── supabase/
 │   ├── schema.sql              # Schema principal
 │   └── migrations/
@@ -265,11 +252,11 @@ Toda a documentação foi organizada na pasta [`docs/`](./docs/):
 - [x] Metas e Orçamentos
 - [x] Design System C6 Bank
 - [x] Mobile-First completo
-- [x] Bot do Telegram (estrutura básica)
+- [x] Validação Zod completa
+- [x] Rate Limiting implementado
 
 ### 🔜 Próximas Melhorias
 
-- [ ] Bot do Telegram - Processamento completo
 - [ ] Exportação de dados (CSV, PDF)
 - [ ] Notificações inteligentes
 - [ ] Análise preditiva com IA

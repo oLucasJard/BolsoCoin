@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { Workspace } from '@/lib/actions/workspace.actions';
 
 type WorkspaceContextType = {
@@ -18,43 +18,53 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar workspace ativo do localStorage
+  // Carregar workspace ativo do localStorage (otimizado)
   useEffect(() => {
+    if (workspaces.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+
     const savedWorkspaceId = localStorage.getItem('activeWorkspaceId');
-    if (savedWorkspaceId && workspaces.length > 0) {
+    
+    if (savedWorkspaceId) {
       const workspace = workspaces.find((w) => w.id === savedWorkspaceId);
       if (workspace) {
         setActiveWorkspaceState(workspace);
-      } else {
-        // Se não encontrou, usa o primeiro
-        setActiveWorkspaceState(workspaces[0]);
+        setIsLoading(false);
+        return;
       }
-    } else if (workspaces.length > 0) {
-      // Se não tem salvo, usa o primeiro
-      setActiveWorkspaceState(workspaces[0]);
     }
+    
+    // Se não encontrou ou não tem salvo, usa o primeiro
+    setActiveWorkspaceState(workspaces[0]);
     setIsLoading(false);
   }, [workspaces]);
 
-  const setActiveWorkspace = (workspace: Workspace | null) => {
+  // Memoizar função setActiveWorkspace
+  const setActiveWorkspace = useCallback((workspace: Workspace | null) => {
     setActiveWorkspaceState(workspace);
     if (workspace) {
       localStorage.setItem('activeWorkspaceId', workspace.id);
     } else {
       localStorage.removeItem('activeWorkspaceId');
     }
-  };
+  }, []);
+
+  // Memoizar o valor do contexto para evitar re-renders desnecessários
+  const contextValue = useMemo(
+    () => ({
+      activeWorkspace,
+      setActiveWorkspace,
+      workspaces,
+      setWorkspaces,
+      isLoading,
+    }),
+    [activeWorkspace, setActiveWorkspace, workspaces, isLoading]
+  );
 
   return (
-    <WorkspaceContext.Provider
-      value={{
-        activeWorkspace,
-        setActiveWorkspace,
-        workspaces,
-        setWorkspaces,
-        isLoading,
-      }}
-    >
+    <WorkspaceContext.Provider value={contextValue}>
       {children}
     </WorkspaceContext.Provider>
   );

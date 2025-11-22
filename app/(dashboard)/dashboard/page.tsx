@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { getDashboardStats } from '@/lib/actions/transaction.actions';
 import StatCard from '@/components/StatCard';
 import TransactionList from '@/components/TransactionList';
 import BalanceChart from '@/components/BalanceChart';
 import CategoryPieChart from '@/components/CategoryPieChart';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { Wallet, TrendingUp, TrendingDown, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -16,13 +17,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!workspaceLoading && activeWorkspace) {
-      loadStats();
-    }
-  }, [activeWorkspace, workspaceLoading]);
-
-  const loadStats = async () => {
+  // Memoizar loadStats para evitar re-criação em cada render
+  const loadStats = useCallback(async () => {
     if (!activeWorkspace) return;
     
     setLoading(true);
@@ -35,17 +31,16 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeWorkspace]);
+
+  useEffect(() => {
+    if (!workspaceLoading && activeWorkspace) {
+      loadStats();
+    }
+  }, [activeWorkspace, workspaceLoading, loadStats]);
 
   if (workspaceLoading || loading || !stats) {
-    return (
-      <div className="min-h-screen bg-c6-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-c6-yellow mx-auto mb-4"></div>
-          <p className="text-c6-gray-400">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Carregando dashboard..." />;
   }
 
   return (

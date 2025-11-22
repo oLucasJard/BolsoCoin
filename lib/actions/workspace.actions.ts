@@ -1,7 +1,14 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { type SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import { 
+  createWorkspaceSchema, 
+  updateWorkspaceSchema,
+  type CreateWorkspaceInput,
+  type UpdateWorkspaceInput
+} from '@/lib/validations/schemas';
 
 // Types
 export type WorkspaceType = 'personal' | 'business' | 'church' | 'project';
@@ -33,15 +40,8 @@ export type WorkspaceMember = {
   joined_at: string;
 };
 
-export type CreateWorkspaceInput = {
-  name: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  type?: WorkspaceType;
-};
-
-export type UpdateWorkspaceInput = Partial<CreateWorkspaceInput>;
+// Re-export types from schemas
+export type { CreateWorkspaceInput, UpdateWorkspaceInput };
 
 // ============================================================================
 // GET WORKSPACES
@@ -71,34 +71,14 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     return await createDefaultWorkspace(supabase, user.id);
   }
 
-  // Buscar workspaces onde o usuário é membro
-  const { data: memberWorkspaces, error: memberError } = await supabase
-    .from('workspace_members')
-    .select('workspace_id')
-    .eq('user_id', user.id);
-
-  if (memberError) throw memberError;
-
-  if (memberWorkspaces && memberWorkspaces.length > 0) {
-    const memberWorkspaceIds = memberWorkspaces.map((wm) => wm.workspace_id);
-    
-    const { data: sharedWorkspaces, error: sharedError } = await supabase
-      .from('workspaces')
-      .select('*')
-      .in('id', memberWorkspaceIds)
-      .neq('owner_id', user.id)
-      .order('created_at', { ascending: true });
-
-    if (sharedError) throw sharedError;
-
-    return [...(ownedWorkspaces || []), ...(sharedWorkspaces || [])];
-  }
-
   // Se não tem workspaces, criar um padrão
   if (!ownedWorkspaces || ownedWorkspaces.length === 0) {
     return await createDefaultWorkspace(supabase, user.id);
   }
 
+  // NOTA: Por enquanto, retornamos apenas workspaces owned
+  // Para implementar workspaces compartilhados, precisaremos de uma solução diferente
+  // para evitar recursão no RLS
   return ownedWorkspaces || [];
 }
 
@@ -106,7 +86,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
 // CREATE DEFAULT WORKSPACE (Helper)
 // ============================================================================
 
-async function createDefaultWorkspace(supabase: any, userId: string): Promise<Workspace[]> {
+async function createDefaultWorkspace(supabase: SupabaseClient, userId: string): Promise<Workspace[]> {
   try {
     // Criar workspace padrão
     const { data: newWorkspace, error: createError } = await supabase
@@ -128,19 +108,16 @@ async function createDefaultWorkspace(supabase: any, userId: string): Promise<Wo
       return [];
     }
 
-    // Adicionar o usuário como owner
-    await supabase.from('workspace_members').insert({
-      workspace_id: newWorkspace.id,
-      user_id: userId,
-      role: 'owner',
-      permissions: {
-        can_view: true,
-        can_create: true,
-        can_edit: true,
-        can_delete: true,
-        can_manage_members: true,
-      },
-    });
+    // TEMPORÁRIO: Comentado para evitar recursão no RLS
+    // A verificação de ownership é feita pela coluna owner_id na tabela workspaces
+    // TODO: Reimplementar quando as políticas RLS estiverem estáveis
+    
+    // const { error: memberError } = await supabase.from('workspace_members').insert({
+    //   workspace_id: newWorkspace.id,
+    //   user_id: userId,
+    //   role: 'owner',
+    //   permissions: { can_view: true, can_create: true, can_edit: true, can_delete: true, can_manage_members: true },
+    // });
 
     return [newWorkspace];
   } catch (error) {
@@ -162,6 +139,11 @@ export async function getWorkspace(workspaceId: string): Promise<Workspace | nul
 
   if (!user) {
     throw new Error('Não autenticado');
+  }
+
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
   }
 
   const { data, error } = await supabase
@@ -204,21 +186,19 @@ export async function createWorkspace(
     throw new Error('Não autenticado');
   }
 
-  // Validações
-  if (!input.name || input.name.trim().length === 0) {
-    throw new Error('Nome do workspace é obrigatório');
-  }
+  // Validar dados com Zod
+  const validatedData = createWorkspaceSchema.parse(input);
 
   // Criar workspace
   const { data: workspace, error: workspaceError } = await supabase
     .from('workspaces')
     .insert({
       owner_id: user.id,
-      name: input.name.trim(),
-      description: input.description || null,
-      icon: input.icon || '💼',
-      color: input.color || '#FFD100',
-      type: input.type || 'personal',
+      name: validatedData.name,
+      description: validatedData.description || null,
+      icon: validatedData.icon || '💼',
+      color: validatedData.color || '#FFD100',
+      type: validatedData.type || 'personal',
       settings: {},
     })
     .select()
@@ -229,28 +209,24 @@ export async function createWorkspace(
     throw new Error('Erro ao criar workspace');
   }
 
-  // Adicionar o criador como owner do workspace
-  const { error: memberError } = await supabase
-    .from('workspace_members')
-    .insert({
-      workspace_id: workspace.id,
-      user_id: user.id,
-      role: 'owner',
-      permissions: {
-        can_view: true,
-        can_create: true,
-        can_edit: true,
-        can_delete: true,
-        can_manage_members: true,
-      },
-    });
+  // TEMPORÁRIO: Comentado para evitar recursão no RLS
+  // A verificação de ownership é feita pela coluna owner_id na tabela workspaces
+  // TODO: Reimplementar quando as políticas RLS estiverem estáveis
+  
+  // const { error: memberError } = await supabase
+  //   .from('workspace_members')
+  //   .insert({
+  //     workspace_id: workspace.id,
+  //     user_id: user.id,
+  //     role: 'owner',
+  //     permissions: { can_view: true, can_create: true, can_edit: true, can_delete: true, can_manage_members: true },
+  //   });
 
-  if (memberError) {
-    console.error('Erro ao adicionar membro:', memberError);
-    // Tentar deletar o workspace criado
-    await supabase.from('workspaces').delete().eq('id', workspace.id);
-    throw new Error('Erro ao configurar workspace');
-  }
+  // if (memberError) {
+  //   console.error('Erro ao adicionar membro:', memberError);
+  //   await supabase.from('workspaces').delete().eq('id', workspace.id);
+  //   throw new Error('Erro ao configurar workspace');
+  // }
 
   revalidatePath('/dashboard');
   revalidatePath('/');
@@ -276,6 +252,14 @@ export async function updateWorkspace(
     throw new Error('Não autenticado');
   }
 
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
+  }
+
+  // Validar dados com Zod
+  const validatedData = updateWorkspaceSchema.parse(input);
+
   // Verificar se o usuário é owner do workspace
   const workspace = await getWorkspace(workspaceId);
   if (!workspace) {
@@ -287,12 +271,12 @@ export async function updateWorkspace(
   }
 
   // Atualizar workspace
-  const updateData: any = {};
-  if (input.name !== undefined) updateData.name = input.name.trim();
-  if (input.description !== undefined) updateData.description = input.description;
-  if (input.icon !== undefined) updateData.icon = input.icon;
-  if (input.color !== undefined) updateData.color = input.color;
-  if (input.type !== undefined) updateData.type = input.type;
+  const updateData: Record<string, any> = {};
+  if (validatedData.name !== undefined) updateData.name = validatedData.name;
+  if (validatedData.description !== undefined) updateData.description = validatedData.description;
+  if (validatedData.icon !== undefined) updateData.icon = validatedData.icon;
+  if (validatedData.color !== undefined) updateData.color = validatedData.color;
+  if (validatedData.type !== undefined) updateData.type = validatedData.type;
 
   const { data, error } = await supabase
     .from('workspaces')
@@ -325,6 +309,11 @@ export async function deleteWorkspace(workspaceId: string): Promise<void> {
 
   if (!user) {
     throw new Error('Não autenticado');
+  }
+
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
   }
 
   // Verificar se o usuário é owner do workspace
@@ -387,24 +376,15 @@ export async function getWorkspaceMembers(
     throw new Error('Não autenticado');
   }
 
-  // Verificar se o usuário tem acesso ao workspace
-  const hasAccess = await isWorkspaceMember(workspaceId, user.id);
-  if (!hasAccess) {
-    throw new Error('Sem permissão para acessar este workspace');
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
   }
 
-  const { data, error } = await supabase
-    .from('workspace_members')
-    .select('*')
-    .eq('workspace_id', workspaceId)
-    .order('joined_at', { ascending: true });
-
-  if (error) {
-    console.error('Erro ao buscar membros:', error);
-    throw new Error('Erro ao buscar membros');
-  }
-
-  return data || [];
+  // TEMPORÁRIO: Retornar vazio para evitar recursão no RLS
+  // TODO: Reimplementar quando as políticas RLS estiverem estáveis
+  console.warn('getWorkspaceMembers desabilitado temporariamente');
+  return [];
 }
 
 // ============================================================================
@@ -417,14 +397,18 @@ async function isWorkspaceMember(
 ): Promise<boolean> {
   const supabase = await createClient();
 
+  // Simplificado: verificar apenas se é owner do workspace
+  // Para evitar recursão no RLS ao consultar workspace_members
   const { data, error } = await supabase
-    .from('workspace_members')
-    .select('workspace_id')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', userId)
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
     .single();
 
-  return !error && data !== null;
+  if (error || !data) return false;
+  
+  // Retorna true se for owner
+  return data.owner_id === userId;
 }
 
 // ============================================================================
@@ -442,16 +426,22 @@ export async function getUserWorkspaceRole(
 
   if (!user) return null;
 
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    return null;
+  }
+
+  // Simplificado: verificar se é owner do workspace
   const { data, error } = await supabase
-    .from('workspace_members')
-    .select('role')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', user.id)
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
     .single();
 
   if (error || !data) return null;
 
-  return data.role;
+  // Se for owner, retorna 'owner', senão null
+  return data.owner_id === user.id ? 'owner' : null;
 }
 
 // ============================================================================
@@ -467,6 +457,11 @@ export async function getWorkspaceStats(workspaceId: string) {
 
   if (!user) {
     throw new Error('Não autenticado');
+  }
+
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
   }
 
   // Verificar acesso
@@ -493,17 +488,15 @@ export async function getWorkspaceStats(workspaceId: string) {
     .select('*', { count: 'exact', head: true })
     .eq('workspace_id', workspaceId);
 
-  // Contar membros
-  const { count: membersCount } = await supabase
-    .from('workspace_members')
-    .select('*', { count: 'exact', head: true })
-    .eq('workspace_id', workspaceId);
+  // TEMPORÁRIO: Retornar 1 membro para evitar recursão
+  // TODO: Reimplementar quando as políticas RLS estiverem estáveis
+  const membersCount = 1;
 
   return {
     transactions: transactionsCount || 0,
     budgets: budgetsCount || 0,
     goals: goalsCount || 0,
-    members: membersCount || 0,
+    members: membersCount,
   };
 }
 

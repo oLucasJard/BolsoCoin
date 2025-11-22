@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { getTransactions, deleteTransaction } from '@/lib/actions/transaction.actions';
 import TransactionList from '@/components/TransactionList';
@@ -16,13 +16,8 @@ export default function TransacoesPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
 
-  useEffect(() => {
-    if (!workspaceLoading && activeWorkspace) {
-      loadTransactions();
-    }
-  }, [filter, activeWorkspace, workspaceLoading]);
-
-  const loadTransactions = async () => {
+  // Memoizar loadTransactions
+  const loadTransactions = useCallback(async () => {
     if (!activeWorkspace) return;
     
     setLoading(true);
@@ -35,9 +30,16 @@ export default function TransacoesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeWorkspace, filter]);
 
-  const handleDelete = async (id: string) => {
+  useEffect(() => {
+    if (!workspaceLoading && activeWorkspace) {
+      loadTransactions();
+    }
+  }, [loadTransactions, activeWorkspace, workspaceLoading]);
+
+  // Memoizar handleDelete
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
 
     try {
@@ -47,7 +49,7 @@ export default function TransacoesPage() {
     } catch (error) {
       toast.error('Erro ao excluir transação');
     }
-  };
+  }, [loadTransactions]);
 
   return (
     <div className="space-y-6">

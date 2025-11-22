@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import {
   getBudgets,
@@ -54,13 +54,8 @@ export default function OrcamentosPage() {
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
 
-  useEffect(() => {
-    if (!workspaceLoading && activeWorkspace) {
-      loadData();
-    }
-  }, [activeWorkspace, workspaceLoading]);
-
-  const loadData = async () => {
+  // Memoizar loadData
+  const loadData = useCallback(async () => {
     if (!activeWorkspace) return;
     
     setLoading(true);
@@ -78,9 +73,16 @@ export default function OrcamentosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeWorkspace, currentMonth, currentYear]);
 
-  const handleCreateBudget = async (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (!workspaceLoading && activeWorkspace) {
+      loadData();
+    }
+  }, [activeWorkspace, workspaceLoading, loadData]);
+
+  // Memoizar handlers
+  const handleCreateBudget = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!activeWorkspace) return;
     
@@ -100,9 +102,9 @@ export default function OrcamentosPage() {
     } catch (error) {
       toast.error('Erro ao criar orçamento');
     }
-  };
+  }, [activeWorkspace, currentMonth, currentYear, loadData]);
 
-  const handleCreateGoal = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateGoal = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!activeWorkspace) return;
     
@@ -122,9 +124,9 @@ export default function OrcamentosPage() {
     } catch (error) {
       toast.error('Erro ao criar meta');
     }
-  };
+  }, [activeWorkspace, loadData]);
 
-  const handleDeleteBudget = async (id: string) => {
+  const handleDeleteBudget = useCallback(async (id: string) => {
     if (!confirm('Deseja excluir este orçamento?')) return;
 
     try {
@@ -134,9 +136,9 @@ export default function OrcamentosPage() {
     } catch (error) {
       toast.error('Erro ao excluir orçamento');
     }
-  };
+  }, [loadData]);
 
-  const handleDeleteGoal = async (id: string) => {
+  const handleDeleteGoal = useCallback(async (id: string) => {
     if (!confirm('Deseja excluir esta meta?')) return;
 
     try {
@@ -146,7 +148,7 @@ export default function OrcamentosPage() {
     } catch (error) {
       toast.error('Erro ao excluir meta');
     }
-  };
+  }, [loadData]);
 
   if (loading) {
     return (

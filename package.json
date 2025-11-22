@@ -19,8 +19,7 @@
     "date-fns": "^4.1.0",
     "recharts": "^2.13.3",
     "lucide-react": "^0.454.0",
-    "sonner": "^1.7.1",
-    "telegraf": "^4.16.3"
+    "sonner": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "^20",

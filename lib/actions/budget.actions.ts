@@ -2,14 +2,16 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { 
+  createBudgetSchema, 
+  updateBudgetSchema, 
+  createGoalSchema, 
+  updateGoalProgressSchema,
+  type CreateBudgetInput,
+  type CreateGoalInput
+} from '@/lib/validations/schemas';
 
-export async function createBudget(data: {
-  categoryName: string;
-  amount: number;
-  month: number;
-  year: number;
-  workspaceId: string;
-}) {
+export async function createBudget(data: CreateBudgetInput) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,15 +19,29 @@ export async function createBudget(data: {
 
   if (!user) throw new Error('Não autenticado');
 
+  // Validar dados com Zod
+  const validatedData = createBudgetSchema.parse(data);
+
+  // Verificar acesso ao workspace (simplificado - evita recursão)
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', validatedData.workspaceId)
+    .single();
+
+  if (!workspace || workspace.owner_id !== user.id) {
+    throw new Error('Você não tem acesso a este workspace');
+  }
+
   const { data: budget, error } = await supabase
     .from('budgets')
     .insert({
       user_id: user.id,
-      workspace_id: data.workspaceId,
-      category_name: data.categoryName,
-      amount: data.amount,
-      month: data.month,
-      year: data.year,
+      workspace_id: validatedData.workspaceId,
+      category_name: validatedData.categoryName,
+      amount: validatedData.amount,
+      month: validatedData.month,
+      year: validatedData.year,
     })
     .select()
     .single();
@@ -43,6 +59,22 @@ export async function getBudgets(workspaceId: string, month?: number, year?: num
   } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Não autenticado');
+
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
+  }
+
+  // Verificar acesso ao workspace (simplificado - evita recursão)
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
+    .single();
+
+  if (!workspace || workspace.owner_id !== user.id) {
+    throw new Error('Você não tem acesso a este workspace');
+  }
 
   const now = new Date();
   const targetMonth = month || now.getMonth() + 1;
@@ -68,9 +100,17 @@ export async function updateBudget(id: string, data: { amount: number }) {
 
   if (!user) throw new Error('Não autenticado');
 
+  // Validar ID
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('ID do orçamento inválido');
+  }
+
+  // Validar dados com Zod
+  const validatedData = updateBudgetSchema.parse(data);
+
   const { error } = await supabase
     .from('budgets')
-    .update({ amount: data.amount, updated_at: new Date().toISOString() })
+    .update({ amount: validatedData.amount, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('user_id', user.id);
 
@@ -87,6 +127,11 @@ export async function deleteBudget(id: string) {
 
   if (!user) throw new Error('Não autenticado');
 
+  // Validar ID
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('ID do orçamento inválido');
+  }
+
   const { error } = await supabase
     .from('budgets')
     .delete()
@@ -98,13 +143,7 @@ export async function deleteBudget(id: string) {
   revalidatePath('/orcamentos');
 }
 
-export async function createGoal(data: {
-  title: string;
-  description?: string;
-  targetAmount: number;
-  deadline?: Date;
-  workspaceId: string;
-}) {
+export async function createGoal(data: CreateGoalInput) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -112,15 +151,29 @@ export async function createGoal(data: {
 
   if (!user) throw new Error('Não autenticado');
 
+  // Validar dados com Zod
+  const validatedData = createGoalSchema.parse(data);
+
+  // Verificar acesso ao workspace (simplificado - evita recursão)
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', validatedData.workspaceId)
+    .single();
+
+  if (!workspace || workspace.owner_id !== user.id) {
+    throw new Error('Você não tem acesso a este workspace');
+  }
+
   const { data: goal, error } = await supabase
     .from('goals')
     .insert({
       user_id: user.id,
-      workspace_id: data.workspaceId,
-      title: data.title,
-      description: data.description,
-      target_amount: data.targetAmount,
-      deadline: data.deadline?.toISOString(),
+      workspace_id: validatedData.workspaceId,
+      title: validatedData.title,
+      description: validatedData.description,
+      target_amount: validatedData.targetAmount,
+      deadline: validatedData.deadline?.toISOString(),
     })
     .select()
     .single();
@@ -138,6 +191,22 @@ export async function getGoals(workspaceId: string) {
   } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Não autenticado');
+
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
+  }
+
+  // Verificar acesso ao workspace (simplificado - evita recursão)
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
+    .single();
+
+  if (!workspace || workspace.owner_id !== user.id) {
+    throw new Error('Você não tem acesso a este workspace');
+  }
 
   const { data, error } = await supabase
     .from('goals')
@@ -158,6 +227,14 @@ export async function updateGoalProgress(id: string, currentAmount: number) {
 
   if (!user) throw new Error('Não autenticado');
 
+  // Validar ID
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('ID da meta inválido');
+  }
+
+  // Validar dados com Zod
+  const validatedData = updateGoalProgressSchema.parse({ currentAmount });
+
   // Buscar a meta para verificar se foi completada
   const { data: goal } = await supabase
     .from('goals')
@@ -165,12 +242,12 @@ export async function updateGoalProgress(id: string, currentAmount: number) {
     .eq('id', id)
     .single();
 
-  const status = goal && currentAmount >= goal.target_amount ? 'completed' : 'active';
+  const status = goal && validatedData.currentAmount >= goal.target_amount ? 'completed' : 'active';
 
   const { error } = await supabase
     .from('goals')
     .update({ 
-      current_amount: currentAmount, 
+      current_amount: validatedData.currentAmount, 
       status,
       updated_at: new Date().toISOString() 
     })
@@ -190,6 +267,11 @@ export async function deleteGoal(id: string) {
 
   if (!user) throw new Error('Não autenticado');
 
+  // Validar ID
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('ID da meta inválido');
+  }
+
   const { error } = await supabase
     .from('goals')
     .delete()
@@ -208,6 +290,22 @@ export async function getBudgetComparison(workspaceId: string, month?: number, y
   } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Não autenticado');
+
+  // Validar workspace ID
+  if (!workspaceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId)) {
+    throw new Error('ID do workspace inválido');
+  }
+
+  // Verificar acesso ao workspace (simplificado - evita recursão)
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
+    .single();
+
+  if (!workspace || workspace.owner_id !== user.id) {
+    throw new Error('Você não tem acesso a este workspace');
+  }
 
   const now = new Date();
   const targetMonth = month || now.getMonth() + 1;

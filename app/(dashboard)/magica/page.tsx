@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { processTextInput, processImageInput, createTransaction } from '@/lib/actions/transaction.actions';
+import { createTransaction } from '@/lib/actions/transaction.actions';
+import { processTextInput, processImageInput } from '@/lib/actions/ai-transaction.actions';
 import { toast } from 'sonner';
-import { MessageSquare, Mic, Image as ImageIcon, Loader2, Check, X, Sparkles } from 'lucide-react';
+import { MessageSquare, Mic, Image as ImageIcon, Loader2, Check, X, Sparkles, Plus, AlertCircle } from 'lucide-react';
 import AudioRecorder from '@/components/AudioRecorder';
+import TransactionForm from '@/components/TransactionForm';
 
 type ExtractedData = {
   amount: number;
@@ -24,6 +26,24 @@ export default function MagicPage() {
   const [processing, setProcessing] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [apiLimit, setApiLimit] = useState<{ usage: number; limit: number } | null>(null);
+
+  // Carregar limite da API
+  useEffect(() => {
+    async function loadApiLimit() {
+      try {
+        const response = await fetch('/api/check-limit');
+        if (response.ok) {
+          const data = await response.json();
+          setApiLimit({ usage: data.usageCount, limit: data.limitValue });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar limite da API:', error);
+      }
+    }
+    loadApiLimit();
+  }, []);
 
   const handleTextSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +54,14 @@ export default function MagicPage() {
       const data = await processTextInput(textInput);
       setExtractedData(data);
       toast.success('Transação extraída! Confirme os dados.');
-    } catch (error) {
-      toast.error('Erro ao processar texto. Tente novamente.');
+      // Recarregar limite após uso
+      const response = await fetch('/api/check-limit');
+      if (response.ok) {
+        const limitData = await response.json();
+        setApiLimit({ usage: limitData.usageCount, limit: limitData.limitValue });
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao processar texto. Tente novamente.');
     } finally {
       setProcessing(false);
     }
@@ -54,10 +80,16 @@ export default function MagicPage() {
         const data = await processImageInput(base64Data);
         setExtractedData(data);
         toast.success('Recibo analisado! Confirme os dados.');
+        // Recarregar limite após uso
+        const response = await fetch('/api/check-limit');
+        if (response.ok) {
+          const limitData = await response.json();
+          setApiLimit({ usage: limitData.usageCount, limit: limitData.limitValue });
+        }
       };
       reader.readAsDataURL(file);
-    } catch (error) {
-      toast.error('Erro ao processar imagem. Tente novamente.');
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao processar imagem. Tente novamente.');
     } finally {
       setProcessing(false);
     }
@@ -100,11 +132,32 @@ export default function MagicPage() {
             <Sparkles className="text-c6-black" size={28} />
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold">
-            Página Mágica
+            Entrada Mágica ✨
           </h1>
           <p className="text-c6-gray-400 text-sm sm:text-base">
-            Adicione transações usando texto, áudio ou imagem
+            Adicione transações de forma inteligente
           </p>
+          
+          {/* API Limit Badge */}
+          {apiLimit && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-c6-gray-900 border border-c6-gray-800 rounded-full text-sm mt-2">
+              <AlertCircle size={16} className={apiLimit.usage >= apiLimit.limit ? 'text-red-500' : 'text-c6-yellow'} />
+              <span className="text-c6-gray-300">
+                IA: <span className="font-medium text-white">{apiLimit.usage}/{apiLimit.limit}</span> chamadas hoje
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Manual Transaction Button */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowManualForm(true)}
+            className="btn-c6-secondary flex items-center gap-2"
+          >
+            <Plus size={20} />
+            <span>Adicionar Manualmente (Sem IA)</span>
+          </button>
         </div>
 
         {/* Tabs - Mobile Optimized */}
@@ -326,6 +379,17 @@ Ex: Recebi 5000 do cliente X"
           </ul>
         </div>
       </div>
+
+      {/* Manual Transaction Form Modal */}
+      {showManualForm && (
+        <TransactionForm
+          onClose={() => setShowManualForm(false)}
+          onSuccess={() => {
+            setShowManualForm(false);
+            toast.success('Transação criada com sucesso!');
+          }}
+        />
+      )}
     </div>
   );
 }

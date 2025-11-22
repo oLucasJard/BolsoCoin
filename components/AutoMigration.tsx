@@ -6,7 +6,7 @@ import { migrateDataToWorkspaces } from '@/lib/actions/migration.actions';
 /**
  * Componente que executa a migração automática uma única vez
  * Usa localStorage para evitar execuções repetidas
- * NOTA: Só executa se usuário já tiver workspace (não bloqueia login)
+ * OTIMIZADO: Não bloqueia a interface, executa em background
  */
 export default function AutoMigration() {
   const [migrated, setMigrated] = useState(false);
@@ -22,32 +22,44 @@ export default function AutoMigration() {
         return;
       }
 
-      // Aguardar 2 segundos para garantir que tudo carregou
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      try {
-        console.log('[AutoMigration] Executando migração...');
-        const result = await migrateDataToWorkspaces();
-        
-        if (result.success) {
-          console.log('[AutoMigration] Migração concluída:', result.message);
-          localStorage.setItem('workspace-migrated', 'true');
-          setMigrated(true);
-          
-          // Recarregar workspaces
-          window.location.reload();
+      // Executar em background sem bloquear (requestIdleCallback se disponível)
+      const runInBackground = () => {
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(async () => {
+            await performMigration();
+          });
         } else {
-          console.log('[AutoMigration] Pulando migração:', result.message);
-          // Se falhar, marca para não tentar novamente (usuário novo)
-          if (result.message.includes('não autenticado') || result.message.includes('workspaces existentes')) {
-            localStorage.setItem('workspace-skip-migration', 'true');
-          }
+          // Fallback: setTimeout mínimo
+          setTimeout(async () => {
+            await performMigration();
+          }, 100);
         }
-      } catch (error) {
-        console.error('[AutoMigration] Erro durante migração:', error);
-        // Marca para pular se der erro (provavelmente usuário novo)
-        localStorage.setItem('workspace-skip-migration', 'true');
-      }
+      };
+
+      const performMigration = async () => {
+        try {
+          const result = await migrateDataToWorkspaces();
+          
+          if (result.success) {
+            localStorage.setItem('workspace-migrated', 'true');
+            setMigrated(true);
+            // Recarregar apenas se migrou dados
+            if (result.message.includes('migrados')) {
+              window.location.reload();
+            }
+          } else {
+            // Se falhar, marca para não tentar novamente
+            if (result.message.includes('não autenticado') || result.message.includes('workspaces existentes')) {
+              localStorage.setItem('workspace-skip-migration', 'true');
+            }
+          }
+        } catch (error) {
+          // Marca para pular se der erro (provavelmente usuário novo)
+          localStorage.setItem('workspace-skip-migration', 'true');
+        }
+      };
+
+      runInBackground();
     };
 
     runMigration();

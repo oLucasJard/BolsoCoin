@@ -27,23 +27,29 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Atualizar sessão do usuário
+  // IMPORTANTE: Permitir acesso às páginas de autenticação sem validação
+  const authPaths = ['/login', '/signup', '/auth'];
+  const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path));
+  
+  // Se for página de autenticação, retornar sem validação
+  if (isAuthPath) {
+    return supabaseResponse;
+  }
+
+  // Atualizar sessão do usuário apenas para rotas protegidas
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   // Rotas protegidas
-  const protectedPaths = ['/dashboard', '/transacoes', '/magica', '/relatorios'];
+  const protectedPaths = ['/dashboard', '/transacoes', '/magica', '/relatorios', '/orcamentos', '/workspaces'];
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
 
   // Redirecionar para login se não autenticado
   if (isProtectedPath && !user) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // Redirecionar para dashboard se já autenticado e tentar acessar auth pages
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return supabaseResponse;

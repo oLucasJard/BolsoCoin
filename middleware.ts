@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Rate limiting básico por IP (prevenir DDoS)
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
   const url = request.nextUrl.pathname;
   
   // Bloquear paths suspeitos

@@ -42,6 +42,7 @@ export default function WorkspacesPage() {
     if (workspaces.length > 0) {
       loadAllStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaces]);
 
   const handleDelete = async (workspaceId: string, workspaceName: string) => {

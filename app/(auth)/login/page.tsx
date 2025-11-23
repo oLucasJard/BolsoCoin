@@ -1,18 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Clock } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  // Verificar se a sessão expirou
+  useEffect(() => {
+    const sessionExpired = searchParams.get('session') === 'expired';
+    if (sessionExpired) {
+      toast.warning('Sua sessão expirou. Por favor, faça login novamente.', {
+        duration: 5000,
+      });
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +61,19 @@ export default function LoginPage() {
       {/* Content */}
       <div className="flex-1 flex items-center justify-center px-4 pb-20">
         <div className="w-full max-w-md">
+          {/* Aviso de sessão expirada */}
+          {searchParams.get('session') === 'expired' && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-start space-x-3">
+              <Clock className="text-amber-500 flex-shrink-0 mt-0.5" size={20} />
+              <div>
+                <h3 className="font-semibold text-amber-500 mb-1">Sessão Expirada</h3>
+                <p className="text-sm text-c6-gray-300">
+                  Por segurança, sua sessão expira após 6 horas de inatividade. Faça login novamente para continuar.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-c6-yellow rounded-full mb-4">
               <span className="text-3xl">💰</span>

@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import WorkspaceSwitcher from '@/components/WorkspaceSwitcher';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import AutoMigration from '@/components/AutoMigration';
+import { SessionValidator } from '@/components/SessionValidator';
 import { getWorkspaces, type Workspace } from '@/lib/actions/workspace.actions';
 import WorkspaceLoader from '@/components/WorkspaceLoader';
 
@@ -34,6 +35,7 @@ export default async function DashboardLayout({
       <Navbar />
       <WorkspaceLoader initialWorkspaces={workspaces} />
       <AutoMigration />
+      <SessionValidator />
       
       {/* Workspace Switcher */}
       {workspaces.length > 0 && (

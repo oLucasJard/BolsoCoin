@@ -1,6 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+// Tempo de expiração da sessão: 6 horas (em segundos)
+const SESSION_EXPIRATION_TIME = 6 * 60 * 60; // 21600 segundos
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -42,12 +45,28 @@ export async function updateSession(request: NextRequest) {
 
   // Atualizar sessão do usuário apenas para rotas protegidas
   const {
-    data: { user },
+    data: { user, session },
   } = await supabase.auth.getUser();
 
   // Rotas protegidas
   const protectedPaths = ['/dashboard', '/transacoes', '/magica', '/relatorios', '/orcamentos', '/workspaces'];
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
+
+  // Verificar se a sessão expirou (mais de 6 horas)
+  if (isProtectedPath && user && session) {
+    const sessionCreatedAt = new Date(user.last_sign_in_at || user.created_at).getTime();
+    const now = Date.now();
+    const sessionAge = (now - sessionCreatedAt) / 1000; // em segundos
+
+    if (sessionAge > SESSION_EXPIRATION_TIME) {
+      // Sessão expirada - fazer logout e redirecionar
+      await supabase.auth.signOut();
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('session', 'expired');
+      loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   // Redirecionar para login se não autenticado e tentando acessar rota protegida
   if (isProtectedPath && !user) {

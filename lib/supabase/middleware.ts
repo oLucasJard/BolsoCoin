@@ -31,8 +31,12 @@ export async function updateSession(request: NextRequest) {
   const authPaths = ['/login', '/signup', '/auth'];
   const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path));
   
-  // Se for página de autenticação, retornar sem validação
-  if (isAuthPath) {
+  // Rotas públicas (não requerem autenticação)
+  const publicPaths = ['/', '/login', '/signup', '/auth'];
+  const isPublicPath = publicPaths.some(path => request.nextUrl.pathname === path);
+  
+  // Se for página pública, retornar sem validação
+  if (isPublicPath) {
     return supabaseResponse;
   }
 
@@ -45,11 +49,16 @@ export async function updateSession(request: NextRequest) {
   const protectedPaths = ['/dashboard', '/transacoes', '/magica', '/relatorios', '/orcamentos', '/workspaces'];
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
 
-  // Redirecionar para login se não autenticado
+  // Redirecionar para login se não autenticado e tentando acessar rota protegida
   if (isProtectedPath && !user) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Se usuário autenticado tenta acessar login/signup, redirecionar para dashboard
+  if (user && isAuthPath) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return supabaseResponse;

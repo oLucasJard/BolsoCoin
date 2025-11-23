@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="h-full">
+    <html lang="pt-BR" className="h-full" data-scroll-behavior="smooth">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#FFD100" />
@@ -39,7 +39,7 @@ export default function RootLayout({
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
-      <body className={`${inter.variable} ${sora.variable} font-sans h-full antialiased`}>
+      <body className={`${inter.variable} ${sora.variable} font-sans h-full antialiased`} suppressHydrationWarning>
         <WorkspaceProvider>
           {children}
         </WorkspaceProvider>

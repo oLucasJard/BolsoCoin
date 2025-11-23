@@ -11,12 +11,22 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   let workspaces: Workspace[] = [];
+  let hasAuthError = false;
   
   try {
     workspaces = await getWorkspaces();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao carregar workspaces:', error);
-    // Continua mesmo se falhar - o usuário será redirecionado pelo middleware se não estiver autenticado
+    
+    // Se erro de autenticação, marcar flag
+    if (error?.message?.includes('session') || error?.message?.includes('auth')) {
+      hasAuthError = true;
+    }
+  }
+
+  // Se teve erro de auth, não renderizar nada (o middleware já redirecionou)
+  if (hasAuthError) {
+    return null;
   }
 
   return (

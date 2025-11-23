@@ -43,10 +43,12 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Atualizar sessão do usuário apenas para rotas protegidas
+  // Obter sessão do usuário
   const {
-    data: { user, session },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const user = session?.user;
 
   // Rotas protegidas
   const protectedPaths = ['/dashboard', '/transacoes', '/magica', '/relatorios', '/orcamentos', '/workspaces'];

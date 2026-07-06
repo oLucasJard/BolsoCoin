@@ -1,23 +1,41 @@
 import OpenAI from 'openai';
+import { z } from 'zod';
 
-// Lazy loading do cliente OpenAI para evitar erros no build
 let openaiInstance: OpenAI | null = null;
+
+const transactionSchema = z.object({
+  amount: z.union([z.number(), z.string()]).optional(),
+  type: z.string().optional(),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  vendor: z.string().optional(),
+  date: z.string().optional(),
+});
 
 function getOpenAIClient() {
   if (!openaiInstance) {
     if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY não configurada. Configure a variável de ambiente.');
+      throw new Error('OPENAI_API_KEY não configurada.');
     }
-    openaiInstance = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    openaiInstance = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
   return openaiInstance;
 }
 
+function parseAIResponse(content: string | null) {
+  if (!content) throw new Error('Resposta vazia da IA');
+  try {
+    const parsed = JSON.parse(content);
+    return transactionSchema.parse(parsed);
+  } catch {
+    throw new Error('Resposta inválida da IA');
+  }
+}
+
 export const extractTransactionFromText = async (text: string) => {
+  if (text.length > 2000) throw new Error('Texto muito longo (máx. 2000 caracteres)');
   const openai = getOpenAIClient();
-  
+
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
@@ -34,21 +52,18 @@ Analise o texto e extraia:
 
 Responda APENAS com um JSON válido, sem texto adicional.`,
       },
-      {
-        role: 'user',
-        content: text,
-      },
+      { role: 'user', content: text },
     ],
     response_format: { type: 'json_object' },
   });
 
-  const result = completion.choices[0].message.content;
-  return JSON.parse(result || '{}');
+  return parseAIResponse(completion.choices[0].message.content);
 };
 
 export const extractTransactionFromImage = async (imageBase64: string) => {
+  if (imageBase64.length > 14_000_000) throw new Error('Imagem muito grande');
   const openai = getOpenAIClient();
-  
+
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
@@ -67,31 +82,11 @@ Responda APENAS com um JSON válido, sem texto adicional.`,
       },
       {
         role: 'user',
-        content: [
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:image/jpeg;base64,${imageBase64}`,
-            },
-          },
-        ],
+        content: [{ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }],
       },
     ],
     response_format: { type: 'json_object' },
   });
 
-  const result = completion.choices[0].message.content;
-  return JSON.parse(result || '{}');
-};
-
-export const transcribeAudio = async (audioFile: File) => {
-  const openai = getOpenAIClient();
-  
-  const transcription = await openai.audio.transcriptions.create({
-    file: audioFile,
-    model: 'whisper-1',
-    language: 'pt',
-  });
-
-  return transcription.text;
+  return parseAIResponse(completion.choices[0].message.content);
 };

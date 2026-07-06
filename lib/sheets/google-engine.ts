@@ -1,6 +1,7 @@
 import 'server-only';
 import { google, sheets_v4 } from 'googleapis';
 import { SheetBackend } from './types';
+import { headerToKey, colIndexToLetter } from './utils';
 
 function normalizeEnv(value: string | undefined): string {
   if (!value) return '';
@@ -42,6 +43,21 @@ async function getSheetsClient(): Promise<sheets_v4.Sheets> {
   return google.sheets({ version: 'v4', auth });
 }
 
+let sheetIdCache: Map<string, number> | null = null;
+
+async function getSheetId(sheetName: string): Promise<number> {
+  if (!sheetIdCache) {
+    const sheets = await getSheetsClient();
+    const meta = await sheets.spreadsheets.get({ spreadsheetId: getSpreadsheetId() });
+    sheetIdCache = new Map(
+      (meta.data.sheets || []).map((s) => [s.properties!.title!, s.properties!.sheetId!])
+    );
+  }
+  const id = sheetIdCache.get(sheetName);
+  if (id === undefined) throw new Error(`Aba ${sheetName} não encontrada na planilha`);
+  return id;
+}
+
 function sheetNameToRange(sheetName: string): string {
   const map: Record<string, string> = {
     Transacoes: 'Transacoes!A:J',
@@ -57,22 +73,22 @@ function sheetNameToRange(sheetName: string): string {
   return map[sheetName] || `${sheetName}!A:Z`;
 }
 
-function rowsToObjects<T>(headers: string[], rows: any[][]): T[] {
+function rowsToObjects<T>(headers: string[], rows: unknown[][]): T[] {
   const result: T[] = [];
   for (const row of rows) {
-    const obj: Record<string, any> = {};
+    const obj: Record<string, unknown> = {};
     headers.forEach((h, idx) => {
-      const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      const key = headerToKey(h);
       obj[key] = row[idx] !== undefined && row[idx] !== null ? row[idx] : '';
     });
-    if (obj.id) result.push(obj as unknown as T);
+    if (obj.id) result.push(obj as T);
   }
   return result;
 }
 
-function objectToRow(headers: string[], data: Record<string, any>): any[] {
-  return headers.map(h => {
-    const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+function objectToRow(headers: string[], data: Record<string, unknown>): unknown[] {
+  return headers.map((h) => {
+    const key = headerToKey(h);
     return data[key] !== undefined ? data[key] : '';
   });
 }
@@ -106,17 +122,18 @@ export const googleSheetsBackend: SheetBackend = {
       const headers = values[0] as string[];
       const rows = values.slice(1);
       return rowsToObjects<T>(headers, rows);
-    } catch (error: any) {
-      if (error.message?.includes('Unable to parse range')) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('Unable to parse range')) {
         console.warn(`[GoogleSheets] Aba ${sheetName} não encontrada. Execute: node scripts/init-google-sheet.js`);
         return [];
       }
-      console.error(`[GoogleSheets] Erro ao ler ${sheetName}:`, error.message);
+      console.error(`[GoogleSheets] Erro ao ler ${sheetName}:`, msg);
       throw error;
     }
   },
 
-  async appendRow(sheetName: string, data: Record<string, any>): Promise<void> {
+  async appendRow(sheetName: string, data: Record<string, unknown>): Promise<void> {
     try {
       const sheets = await getSheetsClient();
       const headers = getHeadersFromEnv(sheetName);
@@ -127,13 +144,14 @@ export const googleSheetsBackend: SheetBackend = {
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [row] },
       });
-    } catch (error: any) {
-      console.error(`[GoogleSheets] Erro ao adicionar em ${sheetName}:`, error.message);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error(`[GoogleSheets] Erro ao adicionar em ${sheetName}:`, msg);
       throw error;
     }
   },
 
-  async updateRow(sheetName: string, id: string, data: Record<string, any>): Promise<void> {
+  async updateRow(sheetName: string, id: string, data: Record<string, unknown>): Promise<void> {
     try {
       const sheets = await getSheetsClient();
       const range = sheetNameToRange(sheetName);
@@ -142,17 +160,17 @@ export const googleSheetsBackend: SheetBackend = {
         range,
       });
       const values = response.data.values || [];
-      if (values.length < 2) return;
+      if (values.length < 2) throw new Error(`Registro ${id} não encontrado em ${sheetName}`);
       const headers = values[0] as string[];
-      const idCol = headers.findIndex(h => h.toLowerCase() === 'id');
-      if (idCol === -1) return;
+      const idCol = headers.findIndex((h) => h.toLowerCase() === 'id');
+      if (idCol === -1) throw new Error(`Coluna ID não encontrada em ${sheetName}`);
 
       for (let i = 1; i < values.length; i++) {
         if (String(values[i][idCol] || '') === id) {
           const updateRange = `${sheetName}!A${i + 1}`;
           const existingRow = values[i];
           const newRow = headers.map((h, idx) => {
-            const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+            const key = headerToKey(h);
             return data[key] !== undefined ? data[key] : (existingRow[idx] || '');
           });
           await sheets.spreadsheets.values.update({
@@ -164,8 +182,10 @@ export const googleSheetsBackend: SheetBackend = {
           return;
         }
       }
-    } catch (error: any) {
-      console.error(`[GoogleSheets] Erro ao atualizar ${sheetName}:`, error.message);
+      throw new Error(`Registro ${id} não encontrado em ${sheetName}`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error(`[GoogleSheets] Erro ao atualizar ${sheetName}:`, msg);
       throw error;
     }
   },
@@ -173,29 +193,30 @@ export const googleSheetsBackend: SheetBackend = {
   async deleteRow(sheetName: string, id: string): Promise<void> {
     try {
       const sheets = await getSheetsClient();
+      const sheetId = await getSheetId(sheetName);
       const range = sheetNameToRange(sheetName);
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId: getSpreadsheetId(),
         range,
       });
       const values = response.data.values || [];
-      if (values.length < 2) return;
+      if (values.length < 2) throw new Error(`Registro ${id} não encontrado em ${sheetName}`);
       const headers = values[0] as string[];
-      const idCol = headers.findIndex(h => h.toLowerCase() === 'id');
-      if (idCol === -1) return;
+      const idCol = headers.findIndex((h) => h.toLowerCase() === 'id');
+      if (idCol === -1) throw new Error(`Coluna ID não encontrada em ${sheetName}`);
 
       for (let i = 1; i < values.length; i++) {
         if (String(values[i][idCol] || '') === id) {
           const rowIndex = i + 1;
-          const lastRow = values.length;
-          if (rowIndex < lastRow) {
+          const lastCol = colIndexToLetter(headers.length - 1);
+          if (rowIndex < values.length) {
             await sheets.spreadsheets.batchUpdate({
               spreadsheetId: getSpreadsheetId(),
               requestBody: {
                 requests: [{
                   deleteDimension: {
                     range: {
-                      sheetId: 0,
+                      sheetId,
                       dimension: 'ROWS',
                       startIndex: rowIndex - 1,
                       endIndex: rowIndex,
@@ -207,7 +228,7 @@ export const googleSheetsBackend: SheetBackend = {
           } else {
             await sheets.spreadsheets.values.update({
               spreadsheetId: getSpreadsheetId(),
-              range: `${sheetName}!A${rowIndex}:${String.fromCharCode(64 + headers.length)}${rowIndex}`,
+              range: `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`,
               valueInputOption: 'USER_ENTERED',
               requestBody: { values: [headers.map(() => '')] },
             });
@@ -215,14 +236,16 @@ export const googleSheetsBackend: SheetBackend = {
           return;
         }
       }
-    } catch (error: any) {
-      console.error(`[GoogleSheets] Erro ao excluir ${sheetName}:`, error.message);
+      throw new Error(`Registro ${id} não encontrado em ${sheetName}`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error(`[GoogleSheets] Erro ao excluir ${sheetName}:`, msg);
       throw error;
     }
   },
 
   async findRowById<T>(sheetName: string, id: string): Promise<T | null> {
     const data = await this.getSheetData<T>(sheetName);
-    return data.find((item: any) => String(item.id) === id) || null;
+    return data.find((item) => String((item as { id?: string }).id) === id) || null;
   },
 };

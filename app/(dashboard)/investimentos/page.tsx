@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { listar, criar, remover, getTotalAplicado, getTotalAtual } from '@/lib/sheets/investimentos';
+import { listar, criar, remover, getTotalAplicado, getTotalAtual, atualizar } from '@/lib/sheets/investimentos';
 import { toast } from 'sonner';
 import { TrendingUp, Plus, Trash2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
@@ -53,6 +53,21 @@ export default function InvestimentosPage() {
     if (!confirm('Excluir este investimento?')) return;
     try { await remover(id); toast.success('Excluído!'); loadData(); }
     catch { toast.error('Erro ao excluir'); }
+  };
+
+  const handleAtualizarValor = async (inv: any) => {
+    const input = prompt('Novo valor atual (R$):', String(inv.valor_atual));
+    if (!input) return;
+    const valor = parseFloat(input.replace(',', '.'));
+    if (!Number.isFinite(valor) || valor < 0) {
+      toast.error('Valor inválido');
+      return;
+    }
+    try {
+      await atualizar(inv.id, { valor_atual: valor });
+      toast.success('Valor atualizado!');
+      loadData();
+    } catch { toast.error('Erro ao atualizar'); }
   };
 
   const lucroTotal = totalAtual - totalAplicado;
@@ -117,6 +132,9 @@ export default function InvestimentosPage() {
                     {lucro >= 0 ? '+' : ''}{perc.toFixed(1)}%
                   </p>
                 </div>
+                <button onClick={() => handleAtualizarValor(inv)} className="p-2 text-c6-yellow hover:bg-c6-gray-800 rounded-full transition text-xs">
+                  Atualizar
+                </button>
                 <button onClick={() => handleDelete(inv.id)} className="p-2 text-red-500 hover:bg-c6-gray-800 rounded-full transition">
                   <Trash2 size={16} />
                 </button>

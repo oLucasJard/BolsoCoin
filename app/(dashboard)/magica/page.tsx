@@ -1,17 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { criar } from '@/lib/sheets/transacoes';
 import { processTextInput, processImageInput } from '@/lib/sheets/ia';
 import { toast } from 'sonner';
-import { MessageSquare, Mic, Image as ImageIcon, Loader2, Check, X, Sparkles, Plus, AlertCircle } from 'lucide-react';
+import { MessageSquare, Mic, Image as ImageIcon, Loader2, Check, X, Sparkles } from 'lucide-react';
 import AudioRecorder from '@/components/AudioRecorder';
+
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 export default function MagicPage() {
   const [activeTab, setActiveTab] = useState<'text' | 'audio' | 'image'>('text');
   const [textInput, setTextInput] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<{
+    amount: number;
+    type: string;
+    tipo: string;
+    description: string;
+    category: string;
+    vendor: string;
+    date: string;
+  } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleTextSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,53 +32,68 @@ export default function MagicPage() {
       const data = await processTextInput(textInput);
       setExtractedData(data);
       toast.success('Transação extraída! Confirme os dados.');
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao processar texto');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao processar texto');
     } finally {
       setProcessing(false);
     }
   };
 
+  const readFileAsBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        resolve(base64.split(',')[1]);
+      };
+      reader.onerror = () => reject(new Error('Erro ao ler imagem'));
+      reader.readAsDataURL(file);
+    });
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error('Imagem muito grande. Máximo 10MB.');
+      return;
+    }
     setProcessing(true);
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const base64 = event.target?.result as string;
-        const base64Data = base64.split(',')[1];
-        const data = await processImageInput(base64Data);
-        setExtractedData(data);
-        toast.success('Recibo analisado! Confirme os dados.');
-      };
-      reader.readAsDataURL(file);
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao processar imagem');
+      const base64Data = await readFileAsBase64(file);
+      const data = await processImageInput(base64Data);
+      setExtractedData(data);
+      toast.success('Recibo analisado! Confirme os dados.');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao processar imagem');
     } finally {
       setProcessing(false);
+      e.target.value = '';
     }
   };
 
   const handleConfirm = async () => {
     if (!extractedData) return;
+    if (!extractedData.description || extractedData.amount <= 0) {
+      toast.error('Dados inválidos. Tente novamente.');
+      return;
+    }
     setProcessing(true);
     try {
       await criar({
-        tipo: extractedData.type === 'income' ? 'receita' : 'despesa',
+        tipo: extractedData.tipo as 'receita' | 'despesa',
         descricao: extractedData.description,
-        valor: parseFloat(extractedData.amount),
+        valor: extractedData.amount,
         categoria: extractedData.category || 'Outros',
         fornecedor: extractedData.vendor || '',
-        data: extractedData.date ? new Date(extractedData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        data: extractedData.date,
         forma_pagamento: '',
-        observacao: textInput,
+        observacao: textInput || 'Entrada por IA',
         status: 'confirmada',
       });
       toast.success('Transação adicionada com sucesso!');
       setExtractedData(null);
       setTextInput('');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao salvar transação.');
     } finally {
       setProcessing(false);
@@ -86,7 +112,7 @@ export default function MagicPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-c6-yellow rounded-full mb-4">
             <Sparkles className="text-c6-black" size={28} />
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold">Entrada Mágica ✨</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold">Entrada Mágica</h1>
           <p className="text-c6-gray-400 text-sm sm:text-base">Adicione transações de forma inteligente</p>
         </div>
 
@@ -113,7 +139,7 @@ export default function MagicPage() {
 
         <div className="card-c6 bg-c6-gray-900">
           {activeTab === 'text' && (
-            <form onSubmit={handleTextSubmit} className="space-y-4">
+            <form ref={formRef} onSubmit={handleTextSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-c6-gray-300 mb-2">Digite sua transação</label>
                 <textarea
@@ -143,10 +169,7 @@ export default function MagicPage() {
                     setTextInput(text);
                     setActiveTab('text');
                     toast.success('Transcrição completa!');
-                    setTimeout(() => {
-                      const form = document.querySelector('form');
-                      if (form) form.requestSubmit();
-                    }, 100);
+                    setTimeout(() => formRef.current?.requestSubmit(), 100);
                   }}
                 />
               </div>
@@ -171,18 +194,18 @@ export default function MagicPage() {
         </div>
 
         {extractedData && (
-          <div className="card-c6 bg-c6-gray-900 border-2 border-c6-yellow animate-in fade-in slide-in-from-bottom-4">
+          <div className="card-c6 bg-c6-gray-900 border-2 border-c6-yellow">
             <h3 className="font-display text-xl font-semibold mb-4 text-c6-yellow">Confirmar Transação</h3>
             <div className="space-y-3 mb-6">
               <div className="flex justify-between items-center py-2 border-b border-c6-gray-800">
                 <span className="text-c6-gray-400">Tipo:</span>
-                <span className={`font-semibold ${extractedData.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-                  {extractedData.type === 'income' ? 'Receita' : 'Despesa'}
+                <span className={`font-semibold ${extractedData.tipo === 'receita' ? 'text-green-500' : 'text-red-500'}`}>
+                  {extractedData.tipo === 'receita' ? 'Receita' : 'Despesa'}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-c6-gray-800">
                 <span className="text-c6-gray-400">Valor:</span>
-                <span className="font-bold text-white text-lg">R$ {parseFloat(extractedData.amount).toFixed(2)}</span>
+                <span className="font-bold text-white text-lg">R$ {extractedData.amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-c6-gray-800">
                 <span className="text-c6-gray-400">Descrição:</span>

@@ -17,10 +17,20 @@ export default function CategoryPieChart({ categories }: CategoryPieChartProps) 
     );
   }
 
-  const data = categories.map((cat) => ({
-    name: cat.name,
-    value: parseFloat(cat.value.toString()),
-  }));
+  const data = categories
+    .map((cat) => ({
+      name: cat.name,
+      value: parseFloat(cat.value.toString()),
+    }))
+    .filter((cat) => Number.isFinite(cat.value) && cat.value > 0);
+
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px] text-c6-gray-500 text-sm">
+        Nenhuma despesa registrada ainda
+      </div>
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={300}>

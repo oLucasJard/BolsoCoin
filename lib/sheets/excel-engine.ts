@@ -3,6 +3,7 @@ import ExcelJS from 'exceljs';
 import path from 'path';
 import fs from 'fs';
 import { SHEET_DEFS, HEADER_COLOR, ID_COLUMN_COLOR } from './sheet-template';
+import { headerToKey } from './utils';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const FILE_PATH = path.join(DATA_DIR, 'bolsocoin.xlsx');
@@ -152,7 +153,7 @@ export function sheetToJSON<T>(sheet: ExcelJS.Worksheet): T[] {
       if (val && typeof val === 'object' && 'result' in val) {
         val = (val as { result: ExcelJS.CellValue }).result;
       }
-      const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      const key = headerToKey(h);
       obj[key] = val ?? '';
     });
     rows.push(obj as T);
@@ -165,7 +166,7 @@ export function appendRow(sheet: ExcelJS.Worksheet, data: Record<string, unknown
   const headers: string[] = [];
   headerRow.eachCell((cell) => headers.push(String(cell.value || '')));
   const values = headers.map(h => {
-    const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    const key = headerToKey(h);
     return data[key] !== undefined ? data[key] : '';
   });
   sheet.addRow(values);
@@ -176,7 +177,7 @@ export function updateRow(sheet: ExcelJS.Worksheet, id: string, data: Record<str
   const headers: string[] = [];
   headerRow.eachCell((cell) => headers.push(String(cell.value || '')));
   const idCol = headers.findIndex(h => h.toLowerCase() === 'id');
-  if (idCol === -1) return;
+  if (idCol === -1) throw new Error('Coluna ID não encontrada');
   for (let i = 2; i <= sheet.rowCount; i++) {
     const row = sheet.getRow(i);
     const cellVal = row.getCell(idCol + 1).value;
@@ -184,13 +185,14 @@ export function updateRow(sheet: ExcelJS.Worksheet, id: string, data: Record<str
       ? (cellVal as { result: string }).result : String(cellVal || '');
     if (rowId === id) {
       headers.forEach((h, idx) => {
-        const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        const key = headerToKey(h);
         if (data[key] !== undefined) row.getCell(idx + 1).value = data[key] as ExcelJS.CellValue;
       });
       row.commit();
       return;
     }
   }
+  throw new Error(`Registro ${id} não encontrado`);
 }
 
 export function deleteRow(sheet: ExcelJS.Worksheet, id: string): void {
@@ -198,7 +200,7 @@ export function deleteRow(sheet: ExcelJS.Worksheet, id: string): void {
   const headers: string[] = [];
   headerRow.eachCell((cell) => headers.push(String(cell.value || '')));
   const idCol = headers.findIndex(h => h.toLowerCase() === 'id');
-  if (idCol === -1) return;
+  if (idCol === -1) throw new Error('Coluna ID não encontrada');
   for (let i = 2; i <= sheet.rowCount; i++) {
     const row = sheet.getRow(i);
     const cellVal = row.getCell(idCol + 1).value;
@@ -209,9 +211,10 @@ export function deleteRow(sheet: ExcelJS.Worksheet, id: string): void {
       return;
     }
   }
+  throw new Error(`Registro ${id} não encontrado`);
 }
 
 export function findRowById<T>(sheet: ExcelJS.Worksheet, id: string): T | null {
   const data = sheetToJSON<T>(sheet);
-  return data.find((item) => (item as { id?: string }).id === id) || null;
+  return data.find((item) => String((item as { id?: string }).id) === id) || null;
 }

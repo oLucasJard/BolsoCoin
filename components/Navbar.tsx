@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ArrowLeftRight, Sparkles, Target, CreditCard, Repeat, TrendingUp, PiggyBank } from 'lucide-react';
+import { Home, ArrowLeftRight, Sparkles, Target, CreditCard, Repeat, TrendingUp, PiggyBank, BarChart3 } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -15,6 +15,7 @@ export default function Navbar() {
     { href: '/investimentos', label: 'Investimentos', icon: TrendingUp },
     { href: '/reservas', label: 'Reservas', icon: PiggyBank },
     { href: '/orcamentos', label: 'Metas', icon: Target },
+    { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
     { href: '/magica', label: 'IA', icon: Sparkles },
   ];
 
@@ -26,6 +27,7 @@ export default function Navbar() {
     { href: '/investimentos', label: 'Inv.', icon: TrendingUp },
     { href: '/reservas', label: 'Reservas', icon: PiggyBank },
     { href: '/orcamentos', label: 'Metas', icon: Target },
+    { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
     { href: '/magica', label: 'IA', icon: Sparkles },
   ];
 

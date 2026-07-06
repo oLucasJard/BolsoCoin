@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { listar, criar, remover, getTotalMeta, getTotalAtual } from '@/lib/sheets/reservas';
+import { listar, criar, remover, getTotalMeta, getTotalAtual, atualizar } from '@/lib/sheets/reservas';
 import { toast } from 'sonner';
-import { PiggyBank, Plus, Trash2, ArrowUpCircle } from 'lucide-react';
+import { PiggyBank, Plus, Trash2 } from 'lucide-react';
 
 export default function ReservasPage() {
   const [reservas, setReservas] = useState<any[]>([]);
@@ -49,6 +49,21 @@ export default function ReservasPage() {
     if (!confirm('Excluir esta reserva?')) return;
     try { await remover(id); toast.success('Excluída!'); loadData(); }
     catch { toast.error('Erro ao excluir'); }
+  };
+
+  const handleDepositar = async (res: any) => {
+    const input = prompt('Quanto deseja depositar? (R$)');
+    if (!input) return;
+    const valor = parseFloat(input.replace(',', '.'));
+    if (!Number.isFinite(valor) || valor <= 0) {
+      toast.error('Valor inválido');
+      return;
+    }
+    try {
+      await atualizar(res.id, { valor_atual: Number(res.valor_atual) + valor });
+      toast.success('Depósito registrado!');
+      loadData();
+    } catch { toast.error('Erro ao depositar'); }
   };
 
   const progressoGeral = totalMeta > 0 ? (totalAtual / totalMeta) * 100 : 0;
@@ -100,9 +115,14 @@ export default function ReservasPage() {
                     {res.prioridade === 'alta' ? '🔴 Alta' : res.prioridade === 'media' ? '🟡 Média' : '🟢 Baixa'}
                   </span>
                 </div>
-                <button onClick={() => handleDelete(res.id)} className="text-red-500 hover:text-red-400 p-1">
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex gap-1">
+                  <button onClick={() => handleDepositar(res)} className="text-c6-yellow hover:text-c6-yellow-light text-xs px-2 py-1">
+                    + Depositar
+                  </button>
+                  <button onClick={() => handleDelete(res.id)} className="text-red-500 hover:text-red-400 p-1">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">

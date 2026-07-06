@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import { Toaster } from "sonner";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 const inter = Inter({ 
@@ -28,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full" data-scroll-behavior="smooth">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="theme-color" content="#FFD100" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -40,6 +41,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${sora.variable} font-sans h-full antialiased`} suppressHydrationWarning>
         {children}
+        <ServiceWorkerRegister />
         <Toaster position="top-center" richColors toastOptions={{
           style: {
             background: '#1A1A1A',

@@ -1,10 +1,21 @@
 'use server';
 import { getSheetData, appendRow, updateRow, deleteRow, gerarId, FaturaCartao } from './engine';
+import { parseSheetNumber, parseSheetDate } from './utils';
 
 const SHEET = 'Faturas';
 
+function normalizeFatura(f: FaturaCartao): FaturaCartao {
+  return {
+    ...f,
+    valor_total: parseSheetNumber(f.valor_total),
+    valor_pago: parseSheetNumber(f.valor_pago),
+    data_vencimento: parseSheetDate(f.data_vencimento),
+  };
+}
+
 export async function listar(): Promise<FaturaCartao[]> {
-  return getSheetData<FaturaCartao>(SHEET);
+  const rows = await getSheetData<FaturaCartao>(SHEET);
+  return rows.map(normalizeFatura);
 }
 
 export async function criar(data: Omit<FaturaCartao, 'id'>): Promise<FaturaCartao> {

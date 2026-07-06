@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { listar, criar, remover } from '@/lib/sheets/cartoes';
+import { listar, criar, remover, atualizar } from '@/lib/sheets/cartoes';
 import { listar as listarFaturas, criar as criarFatura, atualizar as atualizarFatura } from '@/lib/sheets/faturas';
+import { criar as criarTransacao } from '@/lib/sheets/transacoes';
 import { toast } from 'sonner';
-import { CreditCard, Plus, Trash2, DollarSign } from 'lucide-react';
+import { CreditCard, Plus, Trash2, Receipt } from 'lucide-react';
 
 const BANDEIRAS = ['Visa', 'Mastercard', 'Elo', 'Amex', 'Hipercard', 'Nubank', 'Outra'];
 const CORES = ['#FFD100', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
@@ -18,6 +19,12 @@ export default function CartoesPage() {
   const [selectedCartao, setSelectedCartao] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     bandeira: 'Visa', nome: '', limite_total: '', cor: '#FFD100', data_fechamento: '5', data_vencimento: '15',
+  });
+  const [faturaForm, setFaturaForm] = useState({
+    mes: String(new Date().getMonth() + 1),
+    ano: String(new Date().getFullYear()),
+    valor_total: '',
+    data_vencimento: '',
   });
 
   const loadData = useCallback(async () => {
@@ -34,11 +41,16 @@ export default function CartoesPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const limite = parseFloat(formData.limite_total);
+    if (!formData.nome || !Number.isFinite(limite) || limite <= 0) {
+      toast.error('Preencha nome e limite válidos');
+      return;
+    }
     try {
       await criar({
         bandeira: formData.bandeira,
         nome: formData.nome,
-        limite_total: parseFloat(formData.limite_total),
+        limite_total: limite,
         limite_utilizado: 0,
         data_fechamento: parseInt(formData.data_fechamento),
         data_vencimento: parseInt(formData.data_vencimento),
@@ -51,18 +63,68 @@ export default function CartoesPage() {
     } catch { toast.error('Erro ao criar cartão'); }
   };
 
+  const handleCreateFatura = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCartao) return;
+    const valor = parseFloat(faturaForm.valor_total);
+    if (!Number.isFinite(valor) || valor <= 0) {
+      toast.error('Valor da fatura inválido');
+      return;
+    }
+    try {
+      await criarFatura({
+        cartao_id: selectedCartao,
+        mes: parseInt(faturaForm.mes),
+        ano: parseInt(faturaForm.ano),
+        valor_total: valor,
+        valor_pago: 0,
+        status: 'aberta',
+        data_vencimento: faturaForm.data_vencimento || `${faturaForm.ano}-${faturaForm.mes.padStart(2, '0')}-10`,
+      });
+      const cartao = cartoes.find((c) => c.id === selectedCartao);
+      if (cartao) {
+        await atualizar(selectedCartao, {
+          limite_utilizado: Number(cartao.limite_utilizado) + valor,
+        });
+      }
+      toast.success('Fatura criada!');
+      setShowFaturaModal(false);
+      setFaturaForm({ mes: String(new Date().getMonth() + 1), ano: String(new Date().getFullYear()), valor_total: '', data_vencimento: '' });
+      loadData();
+    } catch { toast.error('Erro ao criar fatura'); }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Excluir este cartão?')) return;
     try { await remover(id); toast.success('Cartão excluído!'); loadData(); }
     catch { toast.error('Erro ao excluir'); }
   };
 
-  const handlePagarFatura = async (fatura: any) => {
+  const handlePagarFatura = async (fatura: any, cartao: any) => {
+    if (!confirm(`Pagar fatura de R$ ${Number(fatura.valor_total).toFixed(2)}?`)) return;
     try {
       await atualizarFatura(fatura.id, { valor_pago: fatura.valor_total, status: 'paga' });
+      const novoUtilizado = Math.max(0, Number(cartao.limite_utilizado) - Number(fatura.valor_total));
+      await atualizar(cartao.id, { limite_utilizado: novoUtilizado });
+      await criarTransacao({
+        tipo: 'despesa',
+        descricao: `Pagamento fatura ${cartao.nome} ${fatura.mes}/${fatura.ano}`,
+        valor: Number(fatura.valor_total),
+        categoria: 'Cartão de Crédito',
+        fornecedor: cartao.nome,
+        data: new Date().toISOString().split('T')[0],
+        forma_pagamento: 'crédito',
+        observacao: 'Pagamento de fatura',
+        status: 'confirmada',
+      });
       toast.success('Fatura paga!');
       loadData();
     } catch { toast.error('Erro ao pagar fatura'); }
+  };
+
+  const openFaturaModal = (cartaoId: string) => {
+    setSelectedCartao(cartaoId);
+    setShowFaturaModal(true);
   };
 
   if (loading) {
@@ -78,7 +140,6 @@ export default function CartoesPage() {
         </button>
       </div>
 
-      {/* Cartões */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {cartoes.map((cartao) => {
           const usedPercent = cartao.limite_total > 0 ? (cartao.limite_utilizado / cartao.limite_total) * 100 : 0;
@@ -116,26 +177,31 @@ export default function CartoesPage() {
                   </div>
                 </div>
 
-                {faturasCartao.length > 0 && (
-                  <div className="pt-3 border-t border-c6-gray-700">
-                    <p className="text-xs font-medium text-c6-gray-400 mb-2">Faturas</p>
-                    {faturasCartao.map((f: any) => (
-                      <div key={f.id} className="flex items-center justify-between py-1">
-                        <span className="text-sm text-c6-gray-300">{f.mes}/{f.ano}</span>
-                        <span className={`text-sm font-medium ${
-                          f.status === 'paga' ? 'text-green-500' : f.status === 'vencida' ? 'text-red-500' : 'text-c6-yellow'
-                        }`}>
-                          R$ {Number(f.valor_total).toFixed(2)}
-                          {f.status === 'aberta' && (
-                            <button onClick={() => handlePagarFatura(f)} className="ml-2 text-xs text-green-500 hover:text-green-400">
-                              Pagar
-                            </button>
-                          )}
-                        </span>
-                      </div>
-                    ))}
+                <div className="pt-3 border-t border-c6-gray-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-c6-gray-400">Faturas</p>
+                    <button onClick={() => openFaturaModal(cartao.id)} className="text-xs text-c6-yellow hover:text-c6-yellow-light flex items-center gap-1">
+                      <Receipt size={14} /> Nova fatura
+                    </button>
                   </div>
-                )}
+                  {faturasCartao.length > 0 ? faturasCartao.map((f: any) => (
+                    <div key={f.id} className="flex items-center justify-between py-1">
+                      <span className="text-sm text-c6-gray-300">{f.mes}/{f.ano}</span>
+                      <span className={`text-sm font-medium ${
+                        f.status === 'paga' ? 'text-green-500' : f.status === 'vencida' ? 'text-red-500' : 'text-c6-yellow'
+                      }`}>
+                        R$ {Number(f.valor_total).toFixed(2)}
+                        {f.status === 'aberta' && (
+                          <button onClick={() => handlePagarFatura(f, cartao)} className="ml-2 text-xs text-green-500 hover:text-green-400">
+                            Pagar
+                          </button>
+                        )}
+                      </span>
+                    </div>
+                  )) : (
+                    <p className="text-xs text-c6-gray-500">Nenhuma fatura</p>
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -144,16 +210,14 @@ export default function CartoesPage() {
           <div className="col-span-2 text-center py-16 text-c6-gray-500">
             <CreditCard size={48} className="mx-auto mb-4 text-c6-gray-600" />
             <p className="text-lg mb-2">Nenhum cartão cadastrado</p>
-            <p className="text-sm">Adicione seus cartões de crédito para controlar os gastos</p>
           </div>
         )}
       </div>
 
-      {/* Modal Novo Cartão */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-c6-gray-900 rounded-c6 max-w-md w-full p-6">
-            <h2 className="font-display text-2xl font-bold text-white mb-4">Novo Cartão de Crédito</h2>
+            <h2 className="font-display text-2xl font-bold text-white mb-4">Novo Cartão</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -175,12 +239,12 @@ export default function CartoesPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-c6-gray-300 mb-2">Nome do Cartão</label>
-                <input type="text" value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} required className="input-c6" placeholder="Ex: Nubank Ultravioleta" />
+                <label className="block text-sm font-medium text-c6-gray-300 mb-2">Nome</label>
+                <input type="text" value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} required className="input-c6" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-c6-gray-300 mb-2">Limite Total</label>
-                <input type="number" value={formData.limite_total} onChange={(e) => setFormData({ ...formData, limite_total: e.target.value })} required step="0.01" min="0" className="input-c6" placeholder="5000.00" />
+                <input type="number" value={formData.limite_total} onChange={(e) => setFormData({ ...formData, limite_total: e.target.value })} required step="0.01" min="0" className="input-c6" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -193,8 +257,40 @@ export default function CartoesPage() {
                 </div>
               </div>
               <div className="flex space-x-4 pt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-3 bg-c6-gray-800 text-white rounded-c6-sm hover:bg-c6-gray-700">Cancelar</button>
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-3 bg-c6-gray-800 text-white rounded-c6-sm">Cancelar</button>
                 <button type="submit" className="flex-1 btn-c6">Adicionar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showFaturaModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-c6-gray-900 rounded-c6 max-w-md w-full p-6">
+            <h2 className="font-display text-2xl font-bold text-white mb-4">Nova Fatura</h2>
+            <form onSubmit={handleCreateFatura} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-c6-gray-300 mb-2">Mês</label>
+                  <input type="number" value={faturaForm.mes} onChange={(e) => setFaturaForm({ ...faturaForm, mes: e.target.value })} required min="1" max="12" className="input-c6" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-c6-gray-300 mb-2">Ano</label>
+                  <input type="number" value={faturaForm.ano} onChange={(e) => setFaturaForm({ ...faturaForm, ano: e.target.value })} required className="input-c6" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-c6-gray-300 mb-2">Valor Total</label>
+                <input type="number" value={faturaForm.valor_total} onChange={(e) => setFaturaForm({ ...faturaForm, valor_total: e.target.value })} required step="0.01" min="0" className="input-c6" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-c6-gray-300 mb-2">Data Vencimento</label>
+                <input type="date" value={faturaForm.data_vencimento} onChange={(e) => setFaturaForm({ ...faturaForm, data_vencimento: e.target.value })} className="input-c6" />
+              </div>
+              <div className="flex space-x-4 pt-2">
+                <button type="button" onClick={() => setShowFaturaModal(false)} className="flex-1 px-4 py-3 bg-c6-gray-800 text-white rounded-c6-sm">Cancelar</button>
+                <button type="submit" className="flex-1 btn-c6">Criar Fatura</button>
               </div>
             </form>
           </div>

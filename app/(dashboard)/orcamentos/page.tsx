@@ -89,6 +89,23 @@ export default function OrcamentosPage() {
     } catch { toast.error('Erro ao excluir meta'); }
   }, [loadData]);
 
+  const handleAddProgressoMeta = async (goal: any) => {
+    const input = prompt('Quanto deseja adicionar ao progresso? (R$)');
+    if (!input) return;
+    const valor = parseFloat(input.replace(',', '.'));
+    if (!Number.isFinite(valor) || valor <= 0) {
+      toast.error('Valor inválido');
+      return;
+    }
+    const novoAtual = Number(goal.valor_atual) + valor;
+    const status = novoAtual >= Number(goal.valor_alvo) ? 'completa' : 'ativa';
+    try {
+      await atualizarMeta(goal.id, { valor_atual: novoAtual, status });
+      toast.success('Progresso atualizado!');
+      loadData();
+    } catch { toast.error('Erro ao atualizar meta'); }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -111,11 +128,18 @@ export default function OrcamentosPage() {
       <div className="card-c6 bg-c6-gray-900">
         <h2 className="font-display text-xl font-semibold text-white mb-4">Orçamento vs Realizado - {currentMonth}/{currentYear}</h2>
         <div className="space-y-4">
-          {comparison.map((item, index) => (
-            <div key={index} className="space-y-2">
+          {comparison.map((item) => (
+            <div key={item.id || item.category} className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-white">{item.category}</span>
-                <span className="text-sm text-c6-gray-400">R$ {item.spent.toFixed(2)} / R$ {item.budget.toFixed(2)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-c6-gray-400">R$ {item.spent.toFixed(2)} / R$ {item.budget.toFixed(2)}</span>
+                  {item.id && (
+                    <button onClick={() => handleDeleteBudget(item.id)} className="text-red-500 hover:text-red-400 p-1" title="Excluir orçamento">
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="w-full bg-c6-gray-800 rounded-full h-4">
                 <div
@@ -147,7 +171,8 @@ export default function OrcamentosPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {goals.map((goal) => {
-            const progress = (Number(goal.valor_atual) / Number(goal.valor_alvo)) * 100;
+            const alvo = Number(goal.valor_alvo);
+            const progress = alvo > 0 ? (Number(goal.valor_atual) / alvo) * 100 : 0;
             return (
               <div key={goal.id} className="border border-c6-gray-700 rounded-c6-sm p-4 space-y-3">
                 <div className="flex justify-between items-start">
@@ -155,9 +180,14 @@ export default function OrcamentosPage() {
                     <h3 className="font-semibold text-white">{goal.titulo}</h3>
                     {goal.descricao && <p className="text-sm text-c6-gray-400">{goal.descricao}</p>}
                   </div>
-                  <button onClick={() => handleDeleteGoal(goal.id)} className="text-red-500 hover:text-red-400">
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex gap-1">
+                    <button onClick={() => handleAddProgressoMeta(goal)} className="text-c6-yellow hover:text-c6-yellow-light text-xs px-2 py-1">
+                      + R$
+                    </button>
+                    <button onClick={() => handleDeleteGoal(goal.id)} className="text-red-500 hover:text-red-400">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">

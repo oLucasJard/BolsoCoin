@@ -3,13 +3,15 @@
 import { useEffect, useState, useCallback } from 'react';
 import { listar, remover } from '@/lib/sheets/transacoes';
 import TransactionList from '@/components/TransactionList';
+import TransactionForm from '@/components/TransactionForm';
 import { toast } from 'sonner';
-import { Filter } from 'lucide-react';
+import { Filter, Plus } from 'lucide-react';
 
 export default function TransacoesPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'receita' | 'despesa'>('all');
+  const [showForm, setShowForm] = useState(false);
 
   const loadTransactions = useCallback(async () => {
     setLoading(true);
@@ -20,7 +22,7 @@ export default function TransacoesPage() {
       }
       data.sort((a, b) => b.data.localeCompare(a.data));
       setTransactions(data);
-    } catch (error) {
+    } catch {
       toast.error('Erro ao carregar transações');
     } finally {
       setLoading(false);
@@ -35,7 +37,7 @@ export default function TransacoesPage() {
       await remover(id);
       toast.success('Transação excluída com sucesso');
       loadTransactions();
-    } catch (error) {
+    } catch {
       toast.error('Erro ao excluir transação');
     }
   }, [loadTransactions]);
@@ -44,9 +46,11 @@ export default function TransacoesPage() {
     <div className="container mx-auto px-4 py-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-white">Transações</h1>
+        <button onClick={() => setShowForm(true)} className="btn-c6 text-sm py-2 px-4 flex items-center gap-2">
+          <Plus size={18} /> Nova Transação
+        </button>
       </div>
 
-      {/* Filters */}
       <div className="card-c6 bg-c6-gray-900 p-4 mb-6">
         <div className="flex items-center space-x-4">
           <Filter size={20} className="text-c6-gray-400" />
@@ -75,6 +79,10 @@ export default function TransacoesPage() {
         </div>
       ) : (
         <TransactionList transactions={transactions} onDelete={handleDelete} />
+      )}
+
+      {showForm && (
+        <TransactionForm onClose={() => setShowForm(false)} onSuccess={loadTransactions} />
       )}
     </div>
   );

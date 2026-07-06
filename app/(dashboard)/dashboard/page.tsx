@@ -20,9 +20,11 @@ export default function DashboardPage() {
   const [investInfo, setInvestInfo] = useState({ aplicado: 0, atual: 0 });
   const [reservasInfo, setReservasInfo] = useState({ meta: 0, atual: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const [s, lt, lu, rm, ia, iat, rmTotal, ra] = await Promise.all([
         getDashboardStats(),
@@ -41,6 +43,7 @@ export default function DashboardPage() {
       setReservasInfo({ meta: rmTotal, atual: ra });
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -48,8 +51,17 @@ export default function DashboardPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  if (loading || !stats) {
+  if (loading) {
     return <LoadingSpinner fullScreen message="Carregando dashboard..." />;
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="min-h-screen bg-c6-black flex flex-col items-center justify-center gap-4 p-6">
+        <p className="text-c6-gray-400 text-center">Não foi possível carregar o dashboard.</p>
+        <button onClick={loadData} className="btn-c6">Tentar novamente</button>
+      </div>
+    );
   }
 
   return (
@@ -81,10 +93,13 @@ export default function DashboardPage() {
         <div className="card-c6 bg-gradient-to-br from-c6-yellow to-c6-yellow-dark p-6 sm:p-8">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-c6-black/70 text-sm font-medium mb-2">Saldo Total</p>
+              <p className="text-c6-black/70 text-sm font-medium mb-2">Saldo do Mês</p>
               <h2 className="font-display text-3xl sm:text-4xl font-bold text-c6-black">
                 R$ {stats.balance.toFixed(2)}
               </h2>
+              <p className="text-c6-black/60 text-xs mt-2">
+                Saldo total: R$ {(stats.totalBalance ?? stats.balance).toFixed(2)}
+              </p>
             </div>
             <div className="w-12 h-12 bg-c6-black/10 rounded-full flex items-center justify-center">
               <Wallet className="text-c6-black" size={24} />

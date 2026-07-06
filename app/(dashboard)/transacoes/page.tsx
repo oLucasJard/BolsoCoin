@@ -1,49 +1,38 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { getTransactions, deleteTransaction } from '@/lib/actions/transaction.actions';
+import { listar, remover } from '@/lib/sheets/transacoes';
 import TransactionList from '@/components/TransactionList';
-import { Database } from '@/lib/supabase/types';
 import { toast } from 'sonner';
 import { Filter } from 'lucide-react';
 
-type Transaction = Database['public']['Tables']['transactions']['Row'];
-
 export default function TransacoesPage() {
-  const { activeWorkspace, isLoading: workspaceLoading } = useWorkspace();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [filter, setFilter] = useState<'all' | 'receita' | 'despesa'>('all');
 
-  // Memoizar loadTransactions
   const loadTransactions = useCallback(async () => {
-    if (!activeWorkspace) return;
-    
     setLoading(true);
     try {
-      const filters = filter !== 'all' ? { type: filter as 'income' | 'expense' } : undefined;
-      const data = await getTransactions(activeWorkspace.id, filters);
+      let data = await listar();
+      if (filter !== 'all') {
+        data = data.filter(t => t.tipo === filter);
+      }
+      data.sort((a, b) => b.data.localeCompare(a.data));
       setTransactions(data);
     } catch (error) {
       toast.error('Erro ao carregar transações');
     } finally {
       setLoading(false);
     }
-  }, [activeWorkspace, filter]);
+  }, [filter]);
 
-  useEffect(() => {
-    if (!workspaceLoading && activeWorkspace) {
-      loadTransactions();
-    }
-  }, [loadTransactions, activeWorkspace, workspaceLoading]);
+  useEffect(() => { loadTransactions(); }, [loadTransactions]);
 
-  // Memoizar handleDelete
   const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
-
     try {
-      await deleteTransaction(id);
+      await remover(id);
       toast.success('Transação excluída com sucesso');
       loadTransactions();
     } catch (error) {
@@ -52,57 +41,37 @@ export default function TransacoesPage() {
   }, [loadTransactions]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Transações
-        </h1>
+    <div className="container mx-auto px-4 py-6 max-w-5xl">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-white">Transações</h1>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="card-c6 bg-c6-gray-900 p-4 mb-6">
         <div className="flex items-center space-x-4">
-          <Filter size={20} className="text-gray-600 dark:text-gray-400" />
+          <Filter size={20} className="text-c6-gray-400" />
           <div className="flex space-x-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'all'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              Todas
-            </button>
-            <button
-              onClick={() => setFilter('income')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'income'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              Receitas
-            </button>
-            <button
-              onClick={() => setFilter('expense')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'expense'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              Despesas
-            </button>
+            {(['all', 'receita', 'despesa'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-2 rounded-lg font-medium transition text-sm ${
+                  filter === f
+                    ? 'bg-c6-yellow text-c6-black font-bold'
+                    : 'bg-c6-gray-800 text-c6-gray-300 hover:bg-c6-gray-700'
+                }`}
+              >
+                {f === 'all' ? 'Todas' : f === 'receita' ? 'Receitas' : 'Despesas'}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Transactions List */}
       {loading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Carregando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-c6-yellow mx-auto"></div>
+          <p className="mt-4 text-c6-gray-400">Carregando...</p>
         </div>
       ) : (
         <TransactionList transactions={transactions} onDelete={handleDelete} />
@@ -110,4 +79,3 @@ export default function TransacoesPage() {
     </div>
   );
 }
-

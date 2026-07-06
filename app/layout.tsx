@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import { Toaster } from "sonner";
-import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import "./globals.css";
 
 const inter = Inter({ 
@@ -17,8 +16,8 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "BolsoCoin - Central de Gerenciamento de Carteira",
-  description: "Gerenciamento financeiro pessoal com IA para entrada de dados por texto, áudio e imagem",
+  title: "BolsoCoin - Controle Financeiro Pessoal",
+  description: "Gerenciamento financeiro pessoal integrado com planilha Excel",
 };
 
 export default function RootLayout({
@@ -40,9 +39,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
       <body className={`${inter.variable} ${sora.variable} font-sans h-full antialiased`} suppressHydrationWarning>
-        <WorkspaceProvider>
-          {children}
-        </WorkspaceProvider>
+        {children}
         <Toaster position="top-center" richColors toastOptions={{
           style: {
             background: '#1A1A1A',
@@ -50,24 +47,7 @@ export default function RootLayout({
             border: '1px solid #FFD100',
           },
         }} />
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(
-                  (registration) => {
-                    console.log('SW registered:', registration);
-                  },
-                  (error) => {
-                    console.error('SW registration failed:', error);
-                  }
-                );
-              });
-            }
-          `
-        }} />
       </body>
     </html>
   );
 }
-

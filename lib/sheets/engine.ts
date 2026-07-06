@@ -1,4 +1,5 @@
 import 'server-only';
+import { v4 as uuidv4 } from 'uuid';
 import { SheetBackend } from './types';
 import { googleSheetsBackend } from './google-engine';
 import * as excel from './excel-engine';
@@ -79,7 +80,6 @@ export async function findRowById<T>(sheetName: string, id: string): Promise<T |
 }
 
 export function gerarId(): string {
-  const { v4: uuidv4 } = require('uuid');
   return uuidv4();
 }
 

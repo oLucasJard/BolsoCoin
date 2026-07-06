@@ -2,12 +2,28 @@ import 'server-only';
 import ExcelJS from 'exceljs';
 import path from 'path';
 import fs from 'fs';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { SHEET_DEFS, HEADER_COLOR, ID_COLUMN_COLOR } = require('./sheet-template');
+import { SHEET_DEFS, HEADER_COLOR, ID_COLUMN_COLOR } from './sheet-template';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const FILE_PATH = path.join(DATA_DIR, 'bolsocoin.xlsx');
+
+type SheetDef = (typeof SHEET_DEFS)[number];
+
+type WorksheetWithValidations = ExcelJS.Worksheet & {
+  dataValidations: {
+    add: (
+      range: string,
+      rule: {
+        type: string;
+        allowBlank?: boolean;
+        formulae?: string[];
+        showErrorMessage?: boolean;
+        errorTitle?: string;
+        error?: string;
+      }
+    ) => void;
+  };
+};
 
 const BORDER: Partial<ExcelJS.Borders> = {
   top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
@@ -16,7 +32,7 @@ const BORDER: Partial<ExcelJS.Borders> = {
   right: { style: 'thin', color: { argb: 'FFE0E0E0' } },
 };
 
-function headerStyle(def: { headerColor?: { argb: string } }): Partial<ExcelJS.Style> {
+function headerStyle(def: SheetDef): Partial<ExcelJS.Style> {
   const bg = def.headerColor?.argb || HEADER_COLOR.argb;
   const isDark = bg === '2D2D2D';
   return {
@@ -27,12 +43,13 @@ function headerStyle(def: { headerColor?: { argb: string } }): Partial<ExcelJS.S
   };
 }
 
-function aplicarValidacoes(ws: ExcelJS.Worksheet, def: typeof SHEET_DEFS[0]) {
+function aplicarValidacoes(ws: ExcelJS.Worksheet, def: SheetDef) {
   if (!def.validations) return;
+  const sheet = ws as WorksheetWithValidations;
   for (const v of def.validations) {
     const col = v.col + 1;
     const colLetter = ws.getColumn(col).letter;
-    ws.dataValidations.add(`${colLetter}2:${colLetter}5000`, {
+    sheet.dataValidations.add(`${colLetter}2:${colLetter}5000`, {
       type: 'list',
       allowBlank: true,
       formulae: [`"${v.values.join(',')}"`],
@@ -43,7 +60,7 @@ function aplicarValidacoes(ws: ExcelJS.Worksheet, def: typeof SHEET_DEFS[0]) {
   }
 }
 
-function formatarAba(ws: ExcelJS.Worksheet, def: typeof SHEET_DEFS[0]) {
+function formatarAba(ws: ExcelJS.Worksheet, def: SheetDef) {
   def.headers.forEach((h, i) => {
     const cell = ws.getCell(1, i + 1);
     cell.value = h;
@@ -130,8 +147,11 @@ export function sheetToJSON<T>(sheet: ExcelJS.Worksheet): T[] {
     if (!firstCell) continue;
     const obj: Record<string, unknown> = {};
     headers.forEach((h, idx) => {
-      let val = row.getCell(idx + 1).value;
-      if (val && typeof val === 'object' && 'result' in val) val = (val as { result: unknown }).result;
+      const cell = row.getCell(idx + 1);
+      let val: ExcelJS.CellValue = cell.value;
+      if (val && typeof val === 'object' && 'result' in val) {
+        val = (val as { result: ExcelJS.CellValue }).result;
+      }
       const key = h.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
       obj[key] = val ?? '';
     });
@@ -193,5 +213,5 @@ export function deleteRow(sheet: ExcelJS.Worksheet, id: string): void {
 
 export function findRowById<T>(sheet: ExcelJS.Worksheet, id: string): T | null {
   const data = sheetToJSON<T>(sheet);
-  return data.find((item: { id?: string }) => item.id === id) || null;
+  return data.find((item) => (item as { id?: string }).id === id) || null;
 }
